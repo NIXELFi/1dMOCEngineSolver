@@ -4,6 +4,9 @@ Critical: the parallel Pydantic schema in engine_simulator/gui/config_schema.py
 must remain in lockstep with the dataclass schema in engine_simulator/config/
 engine_config.py. These tests catch drift by loading the canonical
 cbr600rr.json through both paths and comparing results field-by-field.
+
+Limitation: catches drift where Pydantic falls out of sync with the canonical
+JSON. Does not catch dataclass fields added without corresponding JSON coverage.
 """
 
 from __future__ import annotations
