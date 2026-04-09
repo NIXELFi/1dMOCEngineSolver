@@ -3,6 +3,7 @@ import TopBar from "./components/TopBar";
 import TabBar from "./components/TabBar";
 import RunSweepDialog from "./components/RunSweepDialog";
 import SimulationView from "./components/SimulationView";
+import ConfigView from "./components/ConfigView";
 import SweepListSidebar from "./components/SweepListSidebar";
 import { makeEventSocket } from "./api/websocket";
 import { applyServerMessage } from "./state/eventReducer";
@@ -33,11 +34,7 @@ export default function App() {
       <TabBar />
 
       <div className="flex-1 flex overflow-hidden">
-        {activeTab === "simulation" ? (
-          <SimulationView />
-        ) : (
-          <ConfigPlaceholder />
-        )}
+        {activeTab === "simulation" ? <SimulationView /> : <ConfigView />}
         <SweepListSidebar />
       </div>
 
@@ -46,19 +43,5 @@ export default function App() {
         onClose={() => setRunSweepDialogOpen(false)}
       />
     </div>
-  );
-}
-
-/**
- * Stub Config view — replaced in the next phase by a real ConfigView
- * with sticky header and accordion sections. Lives inline here so the
- * tab navigation is fully wired without depending on a file we
- * haven't created yet.
- */
-function ConfigPlaceholder() {
-  return (
-    <main className="flex-1 overflow-auto p-6 flex items-center justify-center text-text-muted text-xs uppercase tracking-[0.2em]">
-      Config tab — coming up next
-    </main>
   );
 }
