@@ -6,6 +6,8 @@ import {
 } from "../state/configStore";
 import IdentitySection from "./config/IdentitySection";
 import CylinderSection from "./config/CylinderSection";
+import CombustionSection from "./config/CombustionSection";
+import RestrictorSection from "./config/RestrictorSection";
 
 const PREFERRED_DEFAULT = "cbr600rr.json";
 
@@ -343,6 +345,8 @@ export default function ConfigView() {
       <div className="p-4 flex flex-col gap-3">
         <IdentitySection />
         <CylinderSection />
+        <CombustionSection />
+        <RestrictorSection />
       </div>
     </main>
   );
