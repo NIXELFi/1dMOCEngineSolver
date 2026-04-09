@@ -7,6 +7,8 @@ import {
 import IdentitySection from "./config/IdentitySection";
 import CylinderSection from "./config/CylinderSection";
 import ValveSection from "./config/ValveSection";
+import PipeListSection from "./config/PipeListSection";
+import PipeRowSection from "./config/PipeRowSection";
 import CombustionSection from "./config/CombustionSection";
 import RestrictorSection from "./config/RestrictorSection";
 import PlenumSection from "./config/PlenumSection";
@@ -351,6 +353,10 @@ export default function ConfigView() {
         <CylinderSection />
         <ValveSection valve="intake_valve" index="03" label="Intake Valve" />
         <ValveSection valve="exhaust_valve" index="04" label="Exhaust Valve" />
+        <PipeListSection section="intake_pipes" index="05" label="Intake Pipes" />
+        <PipeListSection section="exhaust_primaries" index="06" label="Exhaust Primaries" />
+        <PipeListSection section="exhaust_secondaries" index="07" label="Exhaust Secondaries" />
+        <PipeRowSection index="08" label="Exhaust Collector" />
         <CombustionSection />
         <RestrictorSection />
         <PlenumSection />
