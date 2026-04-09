@@ -3,6 +3,10 @@ import { X } from "lucide-react";
 import { api, type ConfigSummary, type StartSweepParams } from "../api/client";
 import { NumericField } from "./forms/NumericField";
 import { CornerBrackets } from "./forms/CornerBrackets";
+import {
+  useConfigStore,
+  selectIsDirty,
+} from "../state/configStore";
 
 interface RunSweepDialogProps {
   isOpen: boolean;
@@ -27,8 +31,6 @@ const DEFAULTS: FormState = {
   config_name: "",
 };
 
-const PREFERRED_CONFIG = "cbr600rr.json";
-
 /**
  * RunSweepDialog — modal form for dispatching a new parallel RPM sweep.
  *
@@ -47,6 +49,9 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
   const [configsError, setConfigsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const activeName = useConfigStore((s) => s.activeName);
+  const isDirty = useConfigStore(selectIsDirty);
 
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
@@ -68,8 +73,10 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
           if (prev.config_name && list.some((c) => c.name === prev.config_name)) {
             return prev;
           }
-          const preferred = list.find((c) => c.name === PREFERRED_CONFIG);
-          const next = preferred ?? list[0];
+          const fromStore =
+            activeName && list.some((c) => c.name === activeName) ? activeName : null;
+          const fallback = list.find((c) => c.name === "cbr600rr.json") ?? list[0];
+          const next = fromStore ? { name: fromStore } : fallback;
           return next ? { ...prev, config_name: next.name } : prev;
         });
       })
@@ -83,6 +90,10 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
     return () => {
       cancelled = true;
     };
+    // activeName is read inside the effect but we intentionally don't re-fetch
+    // configs when it changes — the user may have picked a different option
+    // from the dropdown, and the store value is only consulted on open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   /* ---------------------------------------------------------------------- */
@@ -335,6 +346,26 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
                 loadError={configsError}
                 error={fieldErrors.config_name}
               />
+
+              {/* Dirty-state warning strip -------------------------------- */}
+              {isDirty && form.config_name === activeName && (
+                <div className="border border-accent/40 bg-accent/[0.06] px-3 py-2">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className="mt-[5px] inline-block w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0"
+                      aria-hidden
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-accent leading-none mb-1">
+                        Unsaved Changes
+                      </div>
+                      <div className="text-xs text-text-primary font-mono break-words leading-snug">
+                        Active config has unsaved edits — sweep will use the saved version on disk.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Error strip ------------------------------------------------ */}
