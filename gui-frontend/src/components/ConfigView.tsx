@@ -6,6 +6,7 @@ import {
 } from "../state/configStore";
 import IdentitySection from "./config/IdentitySection";
 import CylinderSection from "./config/CylinderSection";
+import ValveSection from "./config/ValveSection";
 import CombustionSection from "./config/CombustionSection";
 import RestrictorSection from "./config/RestrictorSection";
 import PlenumSection from "./config/PlenumSection";
@@ -348,6 +349,8 @@ export default function ConfigView() {
       <div className="p-4 flex flex-col gap-3">
         <IdentitySection />
         <CylinderSection />
+        <ValveSection valve="intake_valve" index="03" label="Intake Valve" />
+        <ValveSection valve="exhaust_valve" index="04" label="Exhaust Valve" />
         <CombustionSection />
         <RestrictorSection />
         <PlenumSection />
