@@ -4,6 +4,8 @@ import {
   useConfigStore,
   selectIsDirty,
 } from "../state/configStore";
+import IdentitySection from "./config/IdentitySection";
+import CylinderSection from "./config/CylinderSection";
 
 const PREFERRED_DEFAULT = "cbr600rr.json";
 
@@ -337,18 +339,11 @@ export default function ConfigView() {
         </div>
       )}
 
-      {/* Section list — populated by later tasks */}
+      {/* Section list */}
       <div className="p-4 flex flex-col gap-3">
-        <SectionPlaceholder />
+        <IdentitySection />
+        <CylinderSection />
       </div>
     </main>
-  );
-}
-
-function SectionPlaceholder() {
-  return (
-    <div className="border border-dashed border-border-default rounded p-6 text-center text-[10px] uppercase tracking-[0.2em] text-text-muted">
-      Sections appear here once Phase D is complete
-    </div>
   );
 }
