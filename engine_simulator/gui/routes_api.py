@@ -2,14 +2,26 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from engine_simulator.gui.config_schema import EnginePayload
+
 
 router = APIRouter(prefix="/api")
+
+
+_NAME_RE = re.compile(r"^[A-Za-z0-9_\-]+\.json$")
+
+
+def _validate_name(name: str) -> str:
+    if not _NAME_RE.match(name):
+        raise HTTPException(status_code=400, detail=f"Invalid config name: {name!r}")
+    return name
 
 
 # Default directory resolvers — overridable in tests via monkeypatch
@@ -49,6 +61,16 @@ async def get_config(name: str):
         raise HTTPException(status_code=404, detail=f"Config not found: {name}")
     with open(config_path) as f:
         return json.load(f)
+
+
+@router.put("/configs/{name}")
+async def save_config(name: str, payload: EnginePayload):
+    name = _validate_name(name)
+    config_path = Path(get_configs_dir()) / name
+    if not config_path.exists():
+        raise HTTPException(status_code=404, detail=f"Config not found: {name}")
+    config_path.write_text(payload.model_dump_json(indent=4))
+    return payload.model_dump(mode="json")
 
 
 @router.get("/sweeps")
