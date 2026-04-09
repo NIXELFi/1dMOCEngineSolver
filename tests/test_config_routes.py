@@ -122,3 +122,36 @@ class TestSaveAs:
         assert response.status_code == 422
         # And the file must NOT have been written
         assert not (configs_dir / "broken.json").exists()
+
+
+class TestFilenameValidation:
+    def test_put_rejects_path_separator(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        response = client.put("/api/configs/foo%2Fbar.json", json=payload)
+        # FastAPI will URL-decode the path; 400 (our regex), 404, or 405
+        # depending on how the routing resolves; all indicate rejection.
+        assert response.status_code in (400, 404, 405)
+
+    def test_post_rejects_traversal(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "../etc/passwd.json", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 400
+
+    def test_post_rejects_dotfile(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": ".secret.json", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 400
+
+    def test_post_rejects_no_json_extension(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "tweaked", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 400
+
+    def test_post_rejects_double_extension(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "tweaked.json.bak", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 400
