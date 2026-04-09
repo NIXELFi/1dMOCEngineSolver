@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import TopBar from "./components/TopBar";
+import TabBar from "./components/TabBar";
 import RunSweepDialog from "./components/RunSweepDialog";
-import SweepCurves from "./components/SweepCurves";
-import WorkersStrip from "./components/WorkersStrip";
-import RpmDetail from "./components/RpmDetail";
+import SimulationView from "./components/SimulationView";
 import SweepListSidebar from "./components/SweepListSidebar";
 import { makeEventSocket } from "./api/websocket";
 import { applyServerMessage } from "./state/eventReducer";
+import { useConfigStore } from "./state/configStore";
 
 export default function App() {
   const [runSweepDialogOpen, setRunSweepDialogOpen] = useState(false);
+  const activeTab = useConfigStore((s) => s.activeTab);
 
   useEffect(() => {
     const sock = makeEventSocket();
@@ -29,13 +30,14 @@ export default function App() {
           /* SweepListSidebar has its own toggle on the right edge */
         }}
       />
+      <TabBar />
 
       <div className="flex-1 flex overflow-hidden">
-        <main className="flex-1 overflow-auto p-3 flex flex-col gap-3">
-          <SweepCurves />
-          <WorkersStrip />
-          <RpmDetail />
-        </main>
+        {activeTab === "simulation" ? (
+          <SimulationView />
+        ) : (
+          <ConfigPlaceholder />
+        )}
         <SweepListSidebar />
       </div>
 
@@ -44,5 +46,19 @@ export default function App() {
         onClose={() => setRunSweepDialogOpen(false)}
       />
     </div>
+  );
+}
+
+/**
+ * Stub Config view — replaced in the next phase by a real ConfigView
+ * with sticky header and accordion sections. Lives inline here so the
+ * tab navigation is fully wired without depending on a file we
+ * haven't created yet.
+ */
+function ConfigPlaceholder() {
+  return (
+    <main className="flex-1 overflow-auto p-6 flex items-center justify-center text-text-muted text-xs uppercase tracking-[0.2em]">
+      Config tab — coming up next
+    </main>
   );
 }
