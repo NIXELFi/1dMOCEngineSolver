@@ -8,6 +8,9 @@ import IdentitySection from "./config/IdentitySection";
 import CylinderSection from "./config/CylinderSection";
 import CombustionSection from "./config/CombustionSection";
 import RestrictorSection from "./config/RestrictorSection";
+import PlenumSection from "./config/PlenumSection";
+import SimulationSection from "./config/SimulationSection";
+import AmbientSection from "./config/AmbientSection";
 
 const PREFERRED_DEFAULT = "cbr600rr.json";
 
@@ -347,6 +350,9 @@ export default function ConfigView() {
         <CylinderSection />
         <CombustionSection />
         <RestrictorSection />
+        <PlenumSection />
+        <SimulationSection />
+        <AmbientSection />
       </div>
     </main>
   );
