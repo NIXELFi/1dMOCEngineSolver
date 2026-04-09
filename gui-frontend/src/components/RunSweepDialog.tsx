@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { api, type ConfigSummary, type StartSweepParams } from "../api/client";
+import { NumericField } from "./forms/NumericField";
+import { CornerBrackets } from "./forms/CornerBrackets";
 
 interface RunSweepDialogProps {
   isOpen: boolean;
@@ -164,13 +166,9 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
   /* Handlers                                                               */
   /* ---------------------------------------------------------------------- */
 
-  const setNum =
-    (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      // Allow empty string as NaN so validation fires, but parseInt for numbers.
-      const parsed = raw === "" ? NaN : Number(raw);
-      setForm((prev) => ({ ...prev, [key]: parsed }));
-    };
+  const setField = (key: keyof FormState) => (next: number) => {
+    setForm((prev) => ({ ...prev, [key]: next }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,7 +275,7 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
                   label="RPM Start"
                   unit="rpm"
                   value={form.rpm_start}
-                  onChange={setNum("rpm_start")}
+                  onChange={setField("rpm_start")}
                   error={fieldErrors.rpm_start}
                   inputRef={firstFieldRef}
                   step={100}
@@ -288,7 +286,7 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
                   label="RPM End"
                   unit="rpm"
                   value={form.rpm_end}
-                  onChange={setNum("rpm_end")}
+                  onChange={setField("rpm_end")}
                   error={fieldErrors.rpm_end}
                   step={100}
                   min={0}
@@ -302,7 +300,7 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
                   label="RPM Step"
                   unit="rpm"
                   value={form.rpm_step}
-                  onChange={setNum("rpm_step")}
+                  onChange={setField("rpm_step")}
                   error={fieldErrors.rpm_step}
                   step={50}
                   min={1}
@@ -312,7 +310,7 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
                   label="Cycles"
                   unit="n"
                   value={form.n_cycles}
-                  onChange={setNum("n_cycles")}
+                  onChange={setField("n_cycles")}
                   error={fieldErrors.n_cycles}
                   step={1}
                   min={1}
@@ -400,88 +398,6 @@ export default function RunSweepDialog({ isOpen, onClose }: RunSweepDialogProps)
         </div>
       </div>
     </div>
-  );
-}
-
-/* ========================================================================= */
-/* NumericField — label row with [NN] index, input + inline unit, error row  */
-/* ========================================================================= */
-
-interface NumericFieldProps {
-  index: string;
-  label: string;
-  unit: string;
-  value: number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: string;
-  inputRef?: React.Ref<HTMLInputElement>;
-  step?: number;
-  min?: number;
-}
-
-function NumericField({
-  index,
-  label,
-  unit,
-  value,
-  onChange,
-  error,
-  inputRef,
-  step,
-  min,
-}: NumericFieldProps) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      {/* label row */}
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-[9px] font-mono text-text-muted leading-none">
-            [{index}]
-          </span>
-          <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-text-secondary leading-none">
-            {label}
-          </span>
-        </div>
-        {error && (
-          <span className="text-[10px] font-mono text-status-error leading-none">
-            {error}
-          </span>
-        )}
-      </div>
-
-      {/* input + unit ornament */}
-      <div
-        className={[
-          "group flex items-stretch bg-surface border rounded",
-          "transition-colors duration-150 ease-out",
-          error
-            ? "border-status-error/60 focus-within:border-status-error"
-            : "border-border-default focus-within:border-border-emphasis",
-        ].join(" ")}
-      >
-        <input
-          ref={inputRef}
-          type="number"
-          value={Number.isNaN(value) ? "" : value}
-          onChange={onChange}
-          step={step}
-          min={min}
-          inputMode="numeric"
-          className={[
-            "flex-1 min-w-0 bg-transparent outline-none",
-            "px-3 py-2 text-sm font-mono tabular-nums text-text-primary",
-            "placeholder:text-text-muted",
-            // hide the native spinners for a cleaner instrument look
-            "[appearance:textfield]",
-            "[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0",
-            "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0",
-          ].join(" ")}
-        />
-        <span className="flex items-center px-2 border-l border-border-default text-[9px] font-mono uppercase tracking-widest text-text-muted select-none">
-          {unit}
-        </span>
-      </div>
-    </label>
   );
 }
 
@@ -685,28 +601,6 @@ function ConfigField({
         </p>
       )}
     </div>
-  );
-}
-
-/* ========================================================================= */
-/* CornerBrackets — decorative instrument-chassis viewfinder marks            */
-/* ========================================================================= */
-
-function CornerBrackets() {
-  const common = "absolute w-2 h-2 border-border-emphasis pointer-events-none";
-  return (
-    <>
-      <span className={`${common} -top-px -left-px border-t border-l`} aria-hidden />
-      <span className={`${common} -top-px -right-px border-t border-r`} aria-hidden />
-      <span
-        className={`${common} -bottom-px -left-px border-b border-l`}
-        aria-hidden
-      />
-      <span
-        className={`${common} -bottom-px -right-px border-b border-r`}
-        aria-hidden
-      />
-    </>
   );
 }
 
