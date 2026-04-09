@@ -90,3 +90,35 @@ class TestSaveInPlace:
         )
         response = client.put("/api/configs/cbr600rr.json", json=payload)
         assert response.status_code == 422
+
+
+class TestSaveAs:
+    def test_post_creates_new_file(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "tweaked.json", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 200
+        assert (configs_dir / "tweaked.json").exists()
+
+    def test_post_lists_via_get_configs(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "tweaked.json", "payload": payload}
+        client.post("/api/configs", json=body)
+        listing = client.get("/api/configs").json()
+        names = [c["name"] for c in listing]
+        assert "tweaked.json" in names
+
+    def test_post_rejects_existing_name(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        body = {"name": "cbr600rr.json", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 409
+
+    def test_post_with_invalid_payload_returns_422(self, client, configs_dir):
+        payload = _valid_payload(configs_dir)
+        payload["cylinder"]["bore"] = -1
+        body = {"name": "broken.json", "payload": payload}
+        response = client.post("/api/configs", json=body)
+        assert response.status_code == 422
+        # And the file must NOT have been written
+        assert not (configs_dir / "broken.json").exists()

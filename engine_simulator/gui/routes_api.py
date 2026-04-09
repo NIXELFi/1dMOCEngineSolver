@@ -73,6 +73,23 @@ async def save_config(name: str, payload: EnginePayload):
     return payload.model_dump(mode="json")
 
 
+class SaveAsRequest(BaseModel):
+    name: str
+    payload: EnginePayload
+
+
+@router.post("/configs")
+async def save_config_as(req: SaveAsRequest):
+    name = _validate_name(req.name)
+    config_path = Path(get_configs_dir()) / name
+    if config_path.exists():
+        raise HTTPException(
+            status_code=409, detail=f"Config already exists: {name}"
+        )
+    config_path.write_text(req.payload.model_dump_json(indent=4))
+    return req.payload.model_dump(mode="json")
+
+
 @router.get("/sweeps")
 async def list_sweeps_endpoint():
     from engine_simulator.gui.persistence import list_sweeps
