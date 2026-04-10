@@ -99,16 +99,28 @@ async def list_sweeps_endpoint():
 @router.get("/sweeps/{sweep_id}")
 async def get_sweep(sweep_id: str):
     from engine_simulator.gui.persistence import load_sweep
+    from engine_simulator.gui.snapshot import build_snapshot
+    from engine_simulator.gui import server
+
     sweeps_dir = Path(get_sweeps_dir())
     file_path = sweeps_dir / f"{sweep_id}.json"
     if not file_path.exists():
         raise HTTPException(status_code=404, detail=f"Sweep not found: {sweep_id}")
     try:
-        load_sweep(str(file_path))
+        state = load_sweep(str(file_path))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    # Return the raw JSON file content (we already validated it via load_sweep)
+    # Set the loaded sweep as the current state and broadcast a snapshot
+    # so all connected WS clients update their UI with the loaded sweep.
+    if server.sweep_manager is not None:
+        server.sweep_manager._current = state
+        try:
+            snapshot_msg = build_snapshot(state, str(sweeps_dir))
+            await server.sweep_manager._broadcast_fn(snapshot_msg)
+        except Exception:
+            pass  # broadcast failure must not block the HTTP response
+
     import json
     with open(file_path) as f:
         return json.load(f)
