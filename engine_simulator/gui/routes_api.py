@@ -175,3 +175,31 @@ async def get_current_sweep_results(rpm: float):
             detail=f"No recorded results for RPM {rpm}",
         )
     return _serialize_results(results)
+
+
+@router.get("/sweeps/{sweep_id}/report")
+async def download_report(sweep_id: str):
+    import json
+    from fastapi.responses import Response
+    from engine_simulator.gui.report import generate_report
+
+    sweeps_dir = Path(get_sweeps_dir())
+    file_path = sweeps_dir / f"{sweep_id}.json"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Sweep not found: {sweep_id}")
+
+    with open(file_path) as f:
+        sweep_data = json.load(f)
+
+    pdf_bytes = generate_report(sweep_data)
+
+    config_name = sweep_data.get("metadata", {}).get("config_name", "report")
+    if config_name.endswith(".json"):
+        config_name = config_name[:-5]
+    filename = f"{config_name}_{sweep_id}_report.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
