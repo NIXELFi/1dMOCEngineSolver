@@ -155,6 +155,12 @@ export const useDynoStore = create<DynoStore>((set, get) => ({
   _rafId: null,
 
   loadSweepData: () => {
+    // Cancel any running animation before resetting state
+    const prev = get();
+    if (prev._rafId != null) {
+      cancelAnimationFrame(prev._rafId);
+    }
+
     const sweep = useSweepStore.getState().sweep;
     if (!sweep) {
       set({
@@ -165,6 +171,7 @@ export const useDynoStore = create<DynoStore>((set, get) => ({
         interpolated: null,
         currentRpm: 0,
         playing: false,
+        _rafId: null,
       });
       return;
     }
@@ -186,6 +193,7 @@ export const useDynoStore = create<DynoStore>((set, get) => ({
         interpolated: null,
         currentRpm: 0,
         playing: false,
+        _rafId: null,
       });
       return;
     }

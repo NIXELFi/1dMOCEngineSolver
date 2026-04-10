@@ -21,6 +21,13 @@ export default function DynoView() {
     loadSweepData();
   }, [sweep, loadSweepData]);
 
+  // Pause playback when leaving the Dyno tab
+  useEffect(() => {
+    return () => {
+      useDynoStore.getState().pause();
+    };
+  }, []);
+
   const hasSweep = sweepPoints.length > 0;
 
   return (

@@ -125,7 +125,6 @@ export default function ProgressiveCharts() {
   const interpolated = useDynoStore((s) => s.interpolated);
   const rpmMin = useDynoStore((s) => s.rpmMin);
   const rpmMax = useDynoStore((s) => s.rpmMax);
-  const playing = useDynoStore((s) => s.playing);
 
   /**
    * Build the visible rows: all sweep points up to currentRpm,
