@@ -138,4 +138,27 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ name, payload }),
     }),
+
+  downloadReport: async (sweepId: string): Promise<void> => {
+    const response = await fetch(
+      `${BASE}/api/sweeps/${encodeURIComponent(sweepId)}/report`,
+    );
+    if (!response.ok) {
+      let detail = `${response.status} ${response.statusText}`;
+      try {
+        const body = await response.json();
+        if (body.detail) detail = body.detail;
+      } catch {
+        // body wasn't JSON (it's a PDF)
+      }
+      throw new Error(detail);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `report_${sweepId}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

@@ -1,4 +1,5 @@
-import { Play, Square, FolderOpen } from "lucide-react";
+import { useState } from "react";
+import { Play, Square, FolderOpen, FileDown, Loader2 } from "lucide-react";
 import { useSweepStore } from "../state/sweepStore";
 import { api } from "../api/client";
 import type { SweepSnapshot } from "../types/events";
@@ -21,6 +22,22 @@ export default function TopBar({ onRunSweepClick, onLoadClick }: TopBarProps) {
   const connected = useSweepStore((s) => s.connected);
   const isRunning = sweep?.status === "running";
   const hasSweep = sweep !== null;
+
+  const [downloading, setDownloading] = useState(false);
+  const sweepId = sweep?.sweep_id ?? null;
+  const canDownload = sweep?.status === "complete" && !downloading;
+
+  const handleDownloadReport = async () => {
+    if (!sweepId) return;
+    setDownloading(true);
+    try {
+      await api.downloadReport(sweepId);
+    } catch (e) {
+      console.error("Failed to download report", e);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handleStop = async () => {
     if (!window.confirm("Stop the running sweep?")) return;
@@ -100,6 +117,28 @@ export default function TopBar({ onRunSweepClick, onLoadClick }: TopBarProps) {
           <span className="text-text-muted ml-0.5" aria-hidden>
             &#9662;
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDownloadReport}
+          disabled={!canDownload}
+          className={[
+            "inline-flex items-center gap-1.5 h-8 pl-2 pr-2.5 rounded border border-border-default",
+            "text-[11px] font-medium uppercase tracking-[0.14em] leading-none",
+            "transition-colors duration-150 ease-out",
+            !canDownload
+              ? "text-text-muted cursor-not-allowed"
+              : "text-text-secondary hover:bg-surface-raised hover:border-border-emphasis hover:text-text-primary",
+          ].join(" ")}
+          aria-label="Download PDF report"
+        >
+          {downloading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={1.8} />
+          ) : (
+            <FileDown className="w-3.5 h-3.5" strokeWidth={1.8} />
+          )}
+          <span>Report</span>
         </button>
       </div>
 
