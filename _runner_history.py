@@ -149,8 +149,8 @@ axes[3].set_xlabel("crank angle (deg)")
 axes[3].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig("/Users/nmurray/Developer/1d/_runner_history.png", dpi=120, bbox_inches="tight")
-print(f"Saved /Users/nmurray/Developer/1d/_runner_history.png")
+plt.savefig("_runner_history.png", dpi=120, bbox_inches="tight")
+print(f"Saved _runner_history.png")
 
 p_mid_arr = np.array(log["p_mid"])
 p_valve_arr = np.array(log["p_valve"])

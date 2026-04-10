@@ -62,5 +62,5 @@ sub-harmonics, no grid-aliasing modes, no growing noise floor.
 
 ## Files
 
-- Study script: `/Users/nmurray/Developer/1d/_grid_convergence.py`
-- This report:  `/Users/nmurray/Developer/1d/_grid_convergence_report.md`
+- Study script: `_grid_convergence.py`
+- This report:  `_grid_convergence_report.md`

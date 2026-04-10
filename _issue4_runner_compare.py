@@ -94,7 +94,7 @@ def main() -> None:
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    out_path = "/Users/nmurray/Developer/1d/_plot_review/07_issue4_multi_rpm_runner1.png"
+    out_path = "_plot_review/07_issue4_multi_rpm_runner1.png"
     plt.savefig(out_path, dpi=130, bbox_inches="tight")
     print(f"\nSaved {out_path}")
 

@@ -143,7 +143,7 @@ class EventConsumer(Protocol):
 
 - [ ] **Step 2: Verify it imports cleanly**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "from engine_simulator.simulation.parallel_sweep import RPMStartEvent, CycleDoneEvent, ConvergedEvent, RPMDoneEvent, RPMErrorEvent, EventConsumer; print('ok')"`
+Run: `cd  && .venv/bin/python -c "from engine_simulator.simulation.parallel_sweep import RPMStartEvent, CycleDoneEvent, ConvergedEvent, RPMDoneEvent, RPMErrorEvent, EventConsumer; print('ok')"`
 Expected: `ok`
 
 - [ ] **Step 3: Save progress (skip if not using git)**
@@ -272,7 +272,7 @@ class TestCLIEventConsumer:
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_event_consumer.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_event_consumer.py -v`
 Expected: ImportError or AttributeError because `CLIEventConsumer` does not exist yet.
 
 ---
@@ -345,7 +345,7 @@ class CLIEventConsumer:
 
 - [ ] **Step 2: Run the tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_event_consumer.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_event_consumer.py -v`
 Expected: All 8 tests pass.
 
 - [ ] **Step 3: Save progress**
@@ -469,7 +469,7 @@ class TestEventCallback:
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_orchestrator_event_callback.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_orchestrator_event_callback.py -v`
 Expected: TypeError because `run_single_rpm` does not yet accept `event_callback`. May also fail with AttributeError on `_last_step_count`.
 
 ---
@@ -765,12 +765,12 @@ Replace it with:
 
 - [ ] **Step 8: Run the event_callback tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_orchestrator_event_callback.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_orchestrator_event_callback.py -v`
 Expected: All 7 tests pass.
 
 - [ ] **Step 9: Run the existing test suite to verify no math regression**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v --ignore=tests/test_event_consumer.py --ignore=tests/test_orchestrator_event_callback.py`
+Run: `cd  && .venv/bin/pytest tests/ -v --ignore=tests/test_event_consumer.py --ignore=tests/test_orchestrator_event_callback.py`
 Expected: All previously-passing tests still pass. Pay attention to `test_moc.py`, `test_boundaries.py`, `test_cylinder.py`, `test_drivetrain.py` — none should regress.
 
 - [ ] **Step 10: Save progress**
@@ -846,12 +846,12 @@ class TestResultsByRpm:
 
 - [ ] **Step 3: Run the new test to verify it passes**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_orchestrator_event_callback.py::TestResultsByRpm -v`
+Run: `cd  && .venv/bin/pytest tests/test_orchestrator_event_callback.py::TestResultsByRpm -v`
 Expected: The new test passes.
 
 - [ ] **Step 4: Run the full test suite to verify nothing regressed**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 5: Save progress**
@@ -918,7 +918,7 @@ Replace it with:
 
 - [ ] **Step 2: Run a quick sequential sweep manually to verify the output is unchanged**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "
+Run: `cd  && .venv/bin/python -c "
 from engine_simulator.config.engine_config import EngineConfig
 from engine_simulator.simulation.orchestrator import SimulationOrchestrator
 sim = SimulationOrchestrator(EngineConfig())
@@ -928,7 +928,7 @@ Expected: The "Performance Summary" header and table appear, formatted exactly a
 
 - [ ] **Step 3: Run the full test suite to verify nothing regressed**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 4: Save progress**
@@ -1023,7 +1023,7 @@ def _run_one_rpm(
 
 - [ ] **Step 2: Verify the new function imports cleanly**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "from engine_simulator.simulation.parallel_sweep import _run_one_rpm; print('ok')"`
+Run: `cd  && .venv/bin/python -c "from engine_simulator.simulation.parallel_sweep import _run_one_rpm; print('ok')"`
 Expected: `ok`
 
 - [ ] **Step 3: Save progress**
@@ -1250,7 +1250,7 @@ class TestParallelSweepRunner:
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_parallel_sweep_runner.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_parallel_sweep_runner.py -v`
 Expected: ImportError because `ParallelSweepRunner` does not exist yet.
 
 ---
@@ -1426,12 +1426,12 @@ class ParallelSweepRunner:
 
 - [ ] **Step 3: Run the runner tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_parallel_sweep_runner.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_parallel_sweep_runner.py -v`
 Expected: All 7 tests pass.
 
 - [ ] **Step 4: Run the full test suite to verify nothing regressed**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 5: Save progress**
@@ -1586,7 +1586,7 @@ from typing import Callable, Optional
 
 - [ ] **Step 4: Verify the orchestrator imports cleanly**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "
+Run: `cd  && .venv/bin/python -c "
 from engine_simulator.simulation.orchestrator import SimulationOrchestrator
 from engine_simulator.config.engine_config import EngineConfig
 sim = SimulationOrchestrator(EngineConfig())
@@ -1596,7 +1596,7 @@ Expected: `ok`
 
 - [ ] **Step 5: Run a sequential sweep with explicit n_workers=1 to verify the sequential path still works**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "
+Run: `cd  && .venv/bin/python -c "
 from engine_simulator.config.engine_config import EngineConfig
 from engine_simulator.simulation.orchestrator import SimulationOrchestrator
 sim = SimulationOrchestrator(EngineConfig())
@@ -1608,7 +1608,7 @@ Expected: Sequential output appears, summary table prints, then `done`, then `[8
 
 - [ ] **Step 6: Run a parallel sweep with n_workers=2 to verify the parallel path works end-to-end**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "
+Run: `cd  && .venv/bin/python -c "
 from engine_simulator.config.engine_config import EngineConfig
 from engine_simulator.simulation.orchestrator import SimulationOrchestrator
 sim = SimulationOrchestrator(EngineConfig())
@@ -1620,7 +1620,7 @@ Expected: Tagged event lines appear (e.g. `[ 8000 RPM] start (rpm_idx 0)`, `[ 80
 
 - [ ] **Step 7: Run the full test suite**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 8: Save progress**
@@ -1767,22 +1767,22 @@ Replace it with:
 
 - [ ] **Step 4: Verify --help shows the new flags**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.main --help`
+Run: `cd  && .venv/bin/python -m engine_simulator.main --help`
 Expected: `--workers WORKERS` and `--quiet` appear in the help output.
 
 - [ ] **Step 5: Run a tiny sweep via the CLI in parallel mode**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.main sweep --rpm-start 8000 --rpm-end 10000 --rpm-step 2000 --cycles 4 --workers 2 --no-plot`
+Run: `cd  && .venv/bin/python -m engine_simulator.main sweep --rpm-start 8000 --rpm-end 10000 --rpm-step 2000 --cycles 4 --workers 2 --no-plot`
 Expected: Two RPMs run in parallel, tagged event lines appear, the summary table prints at the end, and the script exits cleanly.
 
 - [ ] **Step 6: Run a tiny sweep via the CLI in --workers 1 mode and verify the old format prints appear**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.main sweep --rpm-start 8000 --rpm-end 10000 --rpm-step 2000 --cycles 4 --workers 1 --no-plot`
+Run: `cd  && .venv/bin/python -m engine_simulator.main sweep --rpm-start 8000 --rpm-end 10000 --rpm-step 2000 --cycles 4 --workers 1 --no-plot`
 Expected: The old inline format prints (`Running 8000 RPM... cycle 1 (delta=0.xxxx) cycle 2 ...`) appear; no tagged event lines appear; the summary table prints at the end.
 
 - [ ] **Step 7: Run the full test suite**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 8: Save progress**
@@ -1901,7 +1901,7 @@ class TestPerfDictEquivalence:
 
 - [ ] **Step 2: Run the test to verify it passes**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py::TestPerfDictEquivalence -v`
+Run: `cd  && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py::TestPerfDictEquivalence -v`
 Expected: All 3 tests pass. (This test takes 30-90 seconds because it runs the real solver multiple times.)
 
 - [ ] **Step 3: Save progress**
@@ -2008,17 +2008,17 @@ class TestSimulationResultsEquivalence:
 
 - [ ] **Step 2: Run the test to verify it passes**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py::TestSimulationResultsEquivalence -v`
+Run: `cd  && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py::TestSimulationResultsEquivalence -v`
 Expected: The test passes. (Adds another ~30-90 seconds to the test run.)
 
 - [ ] **Step 3: Run the entire equivalence test file**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py -v`
+Run: `cd  && .venv/bin/pytest tests/test_parallel_sweep_equivalence.py -v`
 Expected: All 4 tests pass.
 
 - [ ] **Step 4: Run the full test suite end-to-end**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ -v`
+Run: `cd  && .venv/bin/pytest tests/ -v`
 Expected: All tests pass.
 
 - [ ] **Step 5: Save progress**
@@ -2041,12 +2041,12 @@ Final hand-validation by the user before considering the work complete.
 
 - [ ] **Step 1: Run the full sweep sequentially and capture output**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 1 --no-plot > /tmp/seq.txt 2>&1`
+Run: `cd  && .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 1 --no-plot > /tmp/seq.txt 2>&1`
 Expected: Completes successfully, file `/tmp/seq.txt` is populated with the old inline-format output and the summary table.
 
 - [ ] **Step 2: Run the full sweep in parallel and capture output**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 8 --no-plot > /tmp/par.txt 2>&1`
+Run: `cd  && .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 8 --no-plot > /tmp/par.txt 2>&1`
 Expected: Completes successfully and noticeably faster than the sequential run. File `/tmp/par.txt` is populated with the tagged event format and the summary table.
 
 - [ ] **Step 3: Compare summary tables — they must be identical**
@@ -2056,17 +2056,17 @@ Expected: No output (the tail of both files — which contains the summary table
 
 - [ ] **Step 4: Compare wall-clock times and report speedup**
 
-Run: `cd /Users/nmurray/Developer/1d && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 1 --no-plot > /dev/null 2>&1`
+Run: `cd  && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 1 --no-plot > /dev/null 2>&1`
 
-Then: `cd /Users/nmurray/Developer/1d && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 8 --no-plot > /dev/null 2>&1`
+Then: `cd  && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 1000 --cycles 12 --workers 8 --no-plot > /dev/null 2>&1`
 
 Expected: The parallel run takes meaningfully less wall-clock time. On a 10-core machine for an 8-RPM sweep, expect 4-8x speedup. If the speedup is less than ~3x, investigate (likely culprits: tiny per-RPM workload not amortizing spawn cost, or unexpected serialization in the consumer thread).
 
 - [ ] **Step 5: (Optional) Test high-def sweep**
 
-Run: `cd /Users/nmurray/Developer/1d && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 250 --cycles 12 --workers 1 --no-plot > /tmp/hd_seq.txt 2>&1`
+Run: `cd  && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 250 --cycles 12 --workers 1 --no-plot > /tmp/hd_seq.txt 2>&1`
 
-Then: `cd /Users/nmurray/Developer/1d && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 250 --cycles 12 --workers 10 --no-plot > /tmp/hd_par.txt 2>&1`
+Then: `cd  && time .venv/bin/python -m engine_simulator.main sweep --rpm-start 6000 --rpm-end 13000 --rpm-step 250 --cycles 12 --workers 10 --no-plot > /tmp/hd_par.txt 2>&1`
 
 Then: `diff <(tail -40 /tmp/hd_seq.txt) <(tail -40 /tmp/hd_par.txt)`
 

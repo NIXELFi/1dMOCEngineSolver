@@ -208,7 +208,7 @@ class EnginePayload(BaseModel):
 
 - [ ] **Step 2: Quick syntax check**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "from engine_simulator.gui.config_schema import EnginePayload; print('ok')"`
+Run: `cd  && .venv/bin/python -c "from engine_simulator.gui.config_schema import EnginePayload; print('ok')"`
 Expected: `ok` (no exceptions).
 
 - [ ] **Step 3: Commit**
@@ -351,7 +351,7 @@ class TestOptionalDiameterOutRoundTrip:
 
 - [ ] **Step 2: Run the tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_schema.py -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_schema.py -v`
 Expected: All 5 tests pass.
 
 If `test_pydantic_dump_loads_via_load_config` fails, the diff between `_normalize(round_tripped)` and `_normalize(original_cfg)` is the schema drift — likely a field with wrong type, missing default, or a tuple-vs-list mismatch in `cd_table`. Fix `config_schema.py`, not the test.
@@ -478,7 +478,7 @@ class TestSaveInPlace:
 
 - [ ] **Step 2: Run the tests to confirm they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveInPlace -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveInPlace -v`
 Expected: All tests fail because `PUT /api/configs/{name}` does not exist (currently returns 405 Method Not Allowed).
 
 - [ ] **Step 3: Add `_validate_name` and the PUT endpoint**
@@ -517,12 +517,12 @@ Note: place the `from engine_simulator.gui.config_schema import EnginePayload` n
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveInPlace -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveInPlace -v`
 Expected: All 6 tests in `TestSaveInPlace` pass.
 
 - [ ] **Step 5: Run the full backend test suite to make sure nothing else broke**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest -q`
+Run: `cd  && .venv/bin/python -m pytest -q`
 Expected: All previously passing tests still pass; the new tests pass.
 
 - [ ] **Step 6: Commit**
@@ -584,7 +584,7 @@ class TestSaveAs:
 
 - [ ] **Step 2: Run the tests to confirm they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveAs -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveAs -v`
 Expected: All 4 tests fail because `POST /api/configs` does not exist.
 
 - [ ] **Step 3: Add the endpoint**
@@ -611,7 +611,7 @@ async def save_config_as(req: SaveAsRequest):
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveAs -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_routes.py::TestSaveAs -v`
 Expected: All 4 tests pass.
 
 - [ ] **Step 5: Commit**
@@ -671,12 +671,12 @@ class TestFilenameValidation:
 
 - [ ] **Step 2: Run the tests**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest tests/test_config_routes.py::TestFilenameValidation -v`
+Run: `cd  && .venv/bin/python -m pytest tests/test_config_routes.py::TestFilenameValidation -v`
 Expected: All 5 tests pass (the existing `_validate_name` regex `^[A-Za-z0-9_\-]+\.json$` already handles all of them).
 
 - [ ] **Step 3: Run the full test suite**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest -q`
+Run: `cd  && .venv/bin/python -m pytest -q`
 Expected: All tests pass.
 
 - [ ] **Step 4: Commit**
@@ -894,7 +894,7 @@ becomes:
 
 - [ ] **Step 4: Build the frontend to verify TypeScript compiles**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -20`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -20`
 Expected: `vite build` succeeds. No TypeScript errors. Output shows the bundle size summary.
 
 If there are errors about missing exports or signature mismatches, fix them. The most likely issue is forgetting to update one of the four `NumericField` call sites.
@@ -996,7 +996,7 @@ export function TextField({
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -1301,7 +1301,7 @@ export const selectIsSectionOpen = (id: string) => (s: ConfigStore): boolean => 
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -1429,7 +1429,7 @@ Inside the `api` object, after `getCurrentResults`, add:
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -1620,12 +1620,12 @@ function ConfigPlaceholder() {
 
 - [ ] **Step 4: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 5: Manual smoke test**
 
-Start the dev server: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run dev` (background it or run in another terminal). Open http://localhost:5173 and verify:
+Start the dev server: `cd gui-frontend && npm run dev` (background it or run in another terminal). Open http://localhost:5173 and verify:
 - TabBar appears below the TopBar with two tabs.
 - Clicking "Config" swaps the main pane to the placeholder text.
 - Clicking "Simulation" swaps it back. The simulation view (SweepCurves, etc.) renders without errors.
@@ -1722,7 +1722,7 @@ export function Accordion({ id, index, label, rightSlot, children }: AccordionPr
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -2157,15 +2157,15 @@ export default function App() {
 
 - [ ] **Step 3: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 4: Manual smoke test**
 
 Start the FastAPI backend in one terminal and the dev frontend in another:
 ```
-cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.gui
-cd /Users/nmurray/Developer/1d/gui-frontend && npm run dev
+cd  && .venv/bin/python -m engine_simulator.gui
+cd gui-frontend && npm run dev
 ```
 
 Open http://localhost:5173, click the "Config" tab. Verify:
@@ -2380,7 +2380,7 @@ Delete the `function SectionPlaceholder()` definition.
 
 - [ ] **Step 4: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 5: Manual smoke test**
@@ -2607,7 +2607,7 @@ Update the section list JSX:
 
 - [ ] **Step 4: Build + smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 Optional manual test: open the GUI, expand Combustion, verify LHV shows `43.5` (MJ/kg) — confirming `displayScale={1e-6}` works correctly against the JSON value `43500000.0` (or `44000000.0` in the existing file).
@@ -2861,7 +2861,7 @@ Update the section list:
 
 - [ ] **Step 5: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 6: Commit**
@@ -2974,7 +2974,7 @@ export function CdTableEditor({ valve }: CdTableEditorProps) {
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -3098,7 +3098,7 @@ Update the section list to insert the two valve sections after Cylinder:
 
 - [ ] **Step 3: Build + smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 Optional manual test: open the GUI, expand Intake Valve. Add a row to the Cd table, edit values, save, verify the file on disk reflects the new row.
@@ -3270,7 +3270,7 @@ export function PipeRow({
 
 - [ ] **Step 2: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 3: Commit**
@@ -3402,7 +3402,7 @@ Update the section list (final ordering):
 
 - [ ] **Step 4: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 5: Manual smoke test**
@@ -3519,13 +3519,13 @@ e. In the form body, just below the `<ConfigField ... />` invocation, add the di
 
 If the project's tailwind theme does not have `status-warning`, fall back to the existing `accent` color: replace `status-warning` with `accent` everywhere in the strip above (the `border-status-warning/40` becomes `border-accent/40`, etc.). Check the tailwind config quickly to confirm:
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && grep -E "(status-warning|warning:)" tailwind.config.js`
+Run: `cd gui-frontend && grep -E "(status-warning|warning:)" tailwind.config.js`
 - If output is empty: use `accent` instead of `status-warning` in the strip above.
 - If `status-warning` exists: keep as written.
 
 - [ ] **Step 3: Build to verify**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: clean build.
 
 - [ ] **Step 4: Manual smoke test**
@@ -3558,7 +3558,7 @@ sweep against a config with unsaved edits."
 
 - [ ] **Step 1: Run the full pytest suite**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m pytest -q`
+Run: `cd  && .venv/bin/python -m pytest -q`
 Expected: All previously passing tests still pass; the new `test_config_schema.py` and `test_config_routes.py` pass. No regressions.
 
 - [ ] **Step 2: Run the manual integration checklist from the spec**
@@ -3579,7 +3579,7 @@ Document any unexpected behavior in the commit message of the next task.
 
 - [ ] **Step 3: Restore the canonical config**
 
-Run: `cd /Users/nmurray/Developer/1d && git checkout engine_simulator/config/cbr600rr.json && rm -f engine_simulator/config/tweaked.json && git status --short`
+Run: `cd  && git checkout engine_simulator/config/cbr600rr.json && rm -f engine_simulator/config/tweaked.json && git status --short`
 Expected: clean working tree (apart from any untracked sweep artifacts in `sweeps/`).
 
 - [ ] **Step 4: Final commit (no code changes — empty unless something needed fixing)**

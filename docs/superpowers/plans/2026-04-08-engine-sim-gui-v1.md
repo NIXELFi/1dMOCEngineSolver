@@ -135,7 +135,7 @@ pytest-asyncio>=0.23
 
 - [ ] **Step 2: Install the new dependencies into the existing venv**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pip install -r requirements.txt 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pip install -r requirements.txt 2>&1 | tail -10`
 Expected: `Successfully installed fastapi-... uvicorn-... pydantic-... websockets-... pytest-asyncio-...` and existing packages already satisfied.
 
 - [ ] **Step 3: Create the gui package marker file**
@@ -350,7 +350,7 @@ class TestHealth:
 
 - [ ] **Step 3: Run test to verify it fails**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -15`
 Expected: `404` because the `/api/health` endpoint doesn't exist yet.
 
 - [ ] **Step 4: Implement routes_api.py with the health endpoint**
@@ -375,12 +375,12 @@ async def health():
 
 - [ ] **Step 5: Run test to verify it passes**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -10`
 Expected: 1 passed.
 
 - [ ] **Step 6: Manual smoke test the server**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.gui --no-browser &` (background it).
+Run: `cd  && .venv/bin/python -m engine_simulator.gui --no-browser &` (background it).
 Wait 2 seconds, then run: `curl -s http://127.0.0.1:8765/api/health`
 Expected: `{"status":"ok"}`
 Then kill the server: `kill %1`
@@ -520,7 +520,7 @@ class TestGUIEventConsumer:
 
 - [ ] **Step 2: Add pytest-asyncio config to enable @pytest.mark.asyncio**
 
-Check if `pytest.ini` or `pyproject.toml` exists at `/Users/nmurray/Developer/1d/`. If not, create `pytest.ini`:
+Check if `pytest.ini` or `pyproject.toml` exists at ``. If not, create `pytest.ini`:
 
 ```ini
 [pytest]
@@ -531,7 +531,7 @@ This makes async test functions work without needing the `@pytest.mark.asyncio` 
 
 - [ ] **Step 3: Run test to verify it fails**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_event_consumer.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_event_consumer.py -v 2>&1 | tail -20`
 Expected: ImportError because `gui_event_consumer.py` doesn't exist yet.
 
 - [ ] **Step 4: Implement GUIEventConsumer**
@@ -590,7 +590,7 @@ class GUIEventConsumer:
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_event_consumer.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_event_consumer.py -v 2>&1 | tail -15`
 Expected: 4 passed.
 
 - [ ] **Step 6: Save progress**
@@ -672,7 +672,7 @@ class LiveSweepState:
 
 - [ ] **Step 2: Verify the file imports cleanly**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -c "from engine_simulator.gui.sweep_manager import LiveSweepState, _make_sweep_id, _iso_now; print('ok')"`
+Run: `cd  && .venv/bin/python -c "from engine_simulator.gui.sweep_manager import LiveSweepState, _make_sweep_id, _iso_now; print('ok')"`
 Expected: `ok`
 
 - [ ] **Step 3: Save progress**
@@ -829,7 +829,7 @@ class TestApplyEvent:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_manager.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_manager.py -v 2>&1 | tail -20`
 Expected: AttributeError because `SweepManager` class and `_apply_event` method don't exist yet.
 
 - [ ] **Step 3: Add SweepManager class with __init__ and _apply_event**
@@ -916,7 +916,7 @@ class SweepManager:
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_manager.py::TestApplyEvent -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_manager.py::TestApplyEvent -v 2>&1 | tail -15`
 Expected: 5 passed.
 
 - [ ] **Step 5: Save progress**
@@ -1086,7 +1086,7 @@ class TestSweepLifecycleStub:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_manager.py::TestSweepLifecycleStub -v 2>&1 | tail -25`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_manager.py::TestSweepLifecycleStub -v 2>&1 | tail -25`
 Expected: AttributeError or ImportError for missing methods (`start_sweep`, `_drain_events`, `_run_sweep_blocking`, `_run_sweep_in_thread`, etc.) and missing imports (`save_sweep`, `load_config`).
 
 - [ ] **Step 3: Add the lifecycle methods + helper imports to SweepManager**
@@ -1330,7 +1330,7 @@ def save_sweep(state, sweeps_dir):
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_manager.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_manager.py -v 2>&1 | tail -20`
 Expected: All tests pass except possibly the ones requiring `save_sweep` (which uses persistence.py — that lives in Phase E). The `test_start_sweep_creates_running_state` test stubs `save_sweep` so it should pass. The `test_start_sweep_raises_if_already_running` test should pass. The `test_drain_task_processes_events_in_order` test should pass.
 
 If `save_sweep` import fails because `persistence.py` doesn't exist yet, the lazy import inside `save_sweep()` won't trigger until that path is hit at runtime — and the stub test patches it. So all 3 tests should pass.
@@ -1444,7 +1444,7 @@ class TestGuiSweepEquivalence:
 
 - [ ] **Step 2: Run the test**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -15`
 Expected: PASS (takes ~5-10 minutes because it runs the real solver twice, 3 RPMs × 4 cycles each).
 
 If the test fails:
@@ -1645,7 +1645,7 @@ class TestSavePerfDicts:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_persistence.py::TestSavePerfDicts -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_persistence.py::TestSavePerfDicts -v 2>&1 | tail -15`
 Expected: ImportError because `persistence.py` doesn't exist yet.
 
 - [ ] **Step 3: Implement persistence.py with save_sweep**
@@ -1796,7 +1796,7 @@ def save_sweep(state: "LiveSweepState", sweeps_dir: str) -> str:
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_persistence.py::TestSavePerfDicts -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_persistence.py::TestSavePerfDicts -v 2>&1 | tail -15`
 Expected: 6 passed.
 
 - [ ] **Step 5: Save progress**
@@ -1911,7 +1911,7 @@ class TestListSweeps:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_persistence.py::TestLoadSweep tests/test_gui_persistence.py::TestListSweeps -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_persistence.py::TestLoadSweep tests/test_gui_persistence.py::TestListSweeps -v 2>&1 | tail -20`
 Expected: ImportError for `load_sweep` and `list_sweeps`.
 
 - [ ] **Step 3: Add load_sweep, list_sweeps, and the LoadedSweepState helper**
@@ -2049,14 +2049,14 @@ def list_sweeps(sweeps_dir: str) -> list:
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_persistence.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_persistence.py -v 2>&1 | tail -20`
 Expected: All persistence tests pass (6 from TestSavePerfDicts + 5 from TestLoadSweep + 3 from TestListSweeps = 14 total).
 
 - [ ] **Step 5: Re-run the equivalence test from D1 (without the save_sweep stub now that persistence exists)**
 
 If you added a `with patch(...)` block to `test_gui_sweep_equivalence.py` in D1, remove it now.
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -10`
 Expected: PASS (the GUI sweep now writes a file to `tmp_path/<filename>.json` on completion, so the test should still pass).
 
 - [ ] **Step 6: Save progress**
@@ -2104,7 +2104,7 @@ class TestSweepsListEndpoint:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py::TestConfigsEndpoint tests/test_gui_routes_api.py::TestSweepsListEndpoint -v 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py::TestConfigsEndpoint tests/test_gui_routes_api.py::TestSweepsListEndpoint -v 2>&1 | tail -10`
 Expected: 404 for both endpoints.
 
 - [ ] **Step 3: Add the endpoints**
@@ -2191,7 +2191,7 @@ async def get_sweep(sweep_id: str):
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -15`
 Expected: All tests pass.
 
 - [ ] **Step 5: Save progress**
@@ -2301,7 +2301,7 @@ async def get_current_sweep_results(rpm: float):
 
 - [ ] **Step 3: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py -v 2>&1 | tail -20`
 Expected: All tests pass.
 
 - [ ] **Step 4: Save progress**
@@ -2403,7 +2403,7 @@ def test_snapshot_lists_available_sweeps_from_disk(tmp_path):
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_snapshot.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_snapshot.py -v 2>&1 | tail -15`
 Expected: ImportError for `snapshot`.
 
 - [ ] **Step 3: Implement snapshot.py**
@@ -2481,7 +2481,7 @@ def build_snapshot(current, sweeps_dir: str) -> dict:
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_snapshot.py -v 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pytest tests/test_gui_snapshot.py -v 2>&1 | tail -10`
 Expected: 3 passed.
 
 - [ ] **Step 5: Save progress**
@@ -2544,7 +2544,7 @@ class TestWebSocketSnapshot:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_ws.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_ws.py -v 2>&1 | tail -15`
 Expected: Tests fail because `/ws/events` route doesn't exist yet.
 
 - [ ] **Step 3: Implement routes_ws.py with the connection registry and broadcast**
@@ -2661,12 +2661,12 @@ async def lifespan(app: FastAPI):
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_ws.py -v 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_ws.py -v 2>&1 | tail -15`
 Expected: 3 passed.
 
 - [ ] **Step 6: Run the full test suite (no equivalence test) to verify nothing regressed**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_routes_api.py tests/test_gui_routes_ws.py tests/test_gui_event_consumer.py tests/test_gui_sweep_manager.py tests/test_gui_persistence.py tests/test_gui_snapshot.py -v 2>&1 | tail -20`
+Run: `cd  && .venv/bin/pytest tests/test_gui_routes_api.py tests/test_gui_routes_ws.py tests/test_gui_event_consumer.py tests/test_gui_sweep_manager.py tests/test_gui_persistence.py tests/test_gui_snapshot.py -v 2>&1 | tail -20`
 Expected: All tests pass.
 
 - [ ] **Step 7: Save progress**
@@ -2741,7 +2741,7 @@ Create `gui-frontend/package.json`:
 
 - [ ] **Step 3: Install npm dependencies**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm install 2>&1 | tail -10`
+Run: `cd gui-frontend && npm install 2>&1 | tail -10`
 Expected: `added N packages` with no errors. May produce some peer dependency warnings; those are fine.
 
 - [ ] **Step 4: Create vite.config.ts**
@@ -2989,7 +2989,7 @@ Create `gui-frontend/src/index.css`:
 
 - [ ] **Step 4: Build the project to verify everything compiles**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -15`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -15`
 Expected: Build completes successfully with output like `vite v5.2.13 building for production...` and `dist/index.html ... dist/assets/*.js dist/assets/*.css`. No errors.
 
 - [ ] **Step 5: Save progress**
@@ -3008,7 +3008,7 @@ git commit -m "feat(gui-frontend): tailwind config with spec design tokens"
 
 - [ ] **Step 1: Verify the scripts directory exists**
 
-Run: `ls /Users/nmurray/Developer/1d/scripts/ 2>/dev/null || mkdir -p /Users/nmurray/Developer/1d/scripts`
+Run: `ls scripts/ 2>/dev/null || mkdir -p scripts`
 
 - [ ] **Step 2: Create the build helper script**
 
@@ -3086,17 +3086,17 @@ if __name__ == "__main__":
 
 - [ ] **Step 3: Run the build script**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python scripts/build_gui.py 2>&1 | tail -10`
-Expected: `Built frontend bundle copied to /Users/nmurray/Developer/1d/engine_simulator/gui/static`
+Run: `cd  && .venv/bin/python scripts/build_gui.py 2>&1 | tail -10`
+Expected: `Built frontend bundle copied to engine_simulator/gui/static`
 
 - [ ] **Step 4: Verify the static files are in place**
 
-Run: `ls /Users/nmurray/Developer/1d/engine_simulator/gui/static/`
+Run: `ls engine_simulator/gui/static/`
 Expected: `index.html  assets/  .gitkeep` (or similar — at minimum `index.html` and an `assets/` directory).
 
 - [ ] **Step 5: Manual smoke test the full server with frontend**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.gui --no-browser &`
+Run: `cd  && .venv/bin/python -m engine_simulator.gui --no-browser &`
 Wait 2 seconds, then run: `curl -s http://127.0.0.1:8765/ | head -5`
 Expected: HTML output starting with `<!doctype html>` (the React app's index.html).
 Then run: `curl -s http://127.0.0.1:8765/api/health`
@@ -3282,7 +3282,7 @@ export type ServerMessage =
 
 - [ ] **Step 2: Verify TypeScript still compiles**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: Build completes successfully.
 
 - [ ] **Step 3: Save progress**
@@ -3466,7 +3466,7 @@ export function makeEventSocket(): EventSocket {
 
 - [ ] **Step 3: Verify TypeScript compiles**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: Build succeeds.
 
 - [ ] **Step 4: Save progress**
@@ -3648,7 +3648,7 @@ export function applyServerMessage(msg: ServerMessage): void {
 
 - [ ] **Step 3: Build to verify TypeScript**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: Build succeeds.
 
 - [ ] **Step 4: Save progress**
@@ -3721,13 +3721,13 @@ export default function App() {
 
 - [ ] **Step 3: Build the frontend, then build the bundle and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build 2>&1 | tail -10`
+Run: `cd gui-frontend && npm run build 2>&1 | tail -10`
 Expected: Build succeeds.
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python scripts/build_gui.py 2>&1 | tail -5`
+Run: `cd  && .venv/bin/python scripts/build_gui.py 2>&1 | tail -5`
 Expected: Bundle copied.
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/python -m engine_simulator.gui --no-browser &`
+Run: `cd  && .venv/bin/python -m engine_simulator.gui --no-browser &`
 Wait 2 seconds, then open in browser: `http://127.0.0.1:8765/`
 Expected: TopBar visible with the design from Section 5.
 Then kill: `kill %1`.
@@ -3757,7 +3757,7 @@ After frontend-design produces RunSweepDialog.tsx, modify TopBar.tsx to manage t
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 Expected: Build succeeds.
 
 Manual: start server, open browser, click "Run Sweep", verify modal appears with form fields. Close modal. Run a tiny sweep (RPM 8000-10000 step 1000, cycles 4, workers 2) — verify the sweep starts (you can check the terminal output).
@@ -3796,7 +3796,7 @@ Add the import: `import SweepCurves from "./components/SweepCurves";`
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 
 Manual: start server, open browser, run a tiny sweep (RPM 8000-10000 step 1000, cycles 4, workers 2). Verify SweepCurves appears with the empty grid, then data points appear as RPMs complete.
 
@@ -3836,7 +3836,7 @@ Add the import: `import WorkersStrip from "./components/WorkersStrip";`
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 
 Manual: start server, open browser, run a tiny sweep. Verify WorkersStrip appears with one tile per RPM, tiles update live with cycle counter and delta sparkline, completed tiles flip to done state with perf summary.
 
@@ -3877,7 +3877,7 @@ Add the import.
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 
 Manual: run a small sweep, click a completed RPM tile in WorkersStrip, verify RpmDetail loads with the Cylinders tab showing 4 cylinder pressure traces. Click the P-V tab, verify P-V diagrams render.
 
@@ -3909,7 +3909,7 @@ In RpmDetail.tsx, replace the placeholder "Not implemented yet" branches in the 
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 
 Manual: run a sweep, click a completed RPM, click each of the four new tabs, verify they render data.
 
@@ -3956,7 +3956,7 @@ Add the import.
 
 - [ ] **Step 3: Build and smoke test**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 
 Manual: run a sweep, wait for it to finish (so a file is auto-saved). Open the sidebar (collapse rail). Verify the sweep appears. Click it, confirm, verify the sweep loads in the main view.
 
@@ -3980,17 +3980,17 @@ End of phase: the 12 manual smoke test steps from spec Section 8 Layer 4 all pas
 
 - [ ] **Step 1: Run the full Python test suite**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/ --tb=no -q 2>&1 | tail -15`
+Run: `cd  && .venv/bin/pytest tests/ --tb=no -q 2>&1 | tail -15`
 Expected: All tests pass (existing 89 from previous work + the new GUI tests).
 
 - [ ] **Step 2: Run the GUI sweep equivalence test specifically**
 
-Run: `cd /Users/nmurray/Developer/1d && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -10`
+Run: `cd  && .venv/bin/pytest tests/test_gui_sweep_equivalence.py -v 2>&1 | tail -10`
 Expected: Bit-identical results between GUI and CLI paths.
 
 - [ ] **Step 3: Build the production bundle**
 
-Run: `cd /Users/nmurray/Developer/1d/gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
+Run: `cd gui-frontend && npm run build && cd .. && .venv/bin/python scripts/build_gui.py`
 Expected: Built bundle copied to `engine_simulator/gui/static/`.
 
 - [ ] **Step 4: Manual smoke test (12 steps from spec Section 8 Layer 4)**
