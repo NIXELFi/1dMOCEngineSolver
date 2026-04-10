@@ -237,6 +237,7 @@ export const useDynoStore = create<DynoStore>((set, get) => ({
       const s = get();
       if (!s.playing) return;
       s.tick(ts);
+      if (!get().playing) return; // tick may have auto-paused
       const rafId = requestAnimationFrame(loop);
       set({ _rafId: rafId });
     };
