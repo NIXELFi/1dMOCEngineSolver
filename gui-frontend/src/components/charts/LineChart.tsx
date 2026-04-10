@@ -55,6 +55,8 @@ export interface LineChartProps {
    * dots fuse into noise. The line stroke alone is more readable.
    */
   showDots?: boolean;
+  /** Fixed x-axis domain [min, max]. If omitted, Recharts auto-scales. */
+  xDomain?: [number, number];
 }
 
 /* ========================================================================= */
@@ -101,6 +103,7 @@ export default function LineChart({
   onPointClick,
   chokedRanges,
   showDots = true,
+  xDomain,
 }: LineChartProps) {
   const hasData = data.length > 0;
 
@@ -207,7 +210,8 @@ export default function LineChart({
             <XAxis
               dataKey={xKey}
               type="number"
-              domain={["dataMin", "dataMax"]}
+              domain={xDomain ?? ["dataMin", "dataMax"]}
+              allowDataOverflow={true}
               stroke={COL.axisLine}
               strokeWidth={1}
               tick={{
