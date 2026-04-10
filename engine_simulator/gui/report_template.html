@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Engine Simulation Report — {{ config_name }}</title>
+<style>
+/* =====================================================================
+   Page setup
+   ===================================================================== */
+@page {
+    size: A4;
+    margin: 20mm;
+
+    @top-right {
+        content: "{{ config_name }} — Engine Simulation Report";
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-size: 8pt;
+        color: #888888;
+    }
+    @bottom-center {
+        content: counter(page);
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-size: 8pt;
+        color: #888888;
+    }
+}
+
+@page cover {
+    margin: 20mm;
+    @top-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+/* =====================================================================
+   Base typography
+   ===================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 10pt;
+    color: #1a1a2e;
+    line-height: 1.4;
+}
+
+/* =====================================================================
+   Cover page
+   ===================================================================== */
+.cover {
+    page: cover;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 247mm; /* A4 minus margins */
+    text-align: center;
+}
+
+.cover-accent-line {
+    width: 80mm;
+    height: 3px;
+    background-color: #1e3a5f;
+    margin: 8mm auto;
+}
+
+.cover-title {
+    font-size: 28pt;
+    font-weight: 700;
+    color: #1e3a5f;
+    letter-spacing: 0.02em;
+    margin-bottom: 4mm;
+}
+
+.cover-subtitle {
+    font-size: 14pt;
+    font-weight: 400;
+    color: #555555;
+    margin-bottom: 2mm;
+}
+
+.cover-config {
+    font-size: 18pt;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 3mm 0;
+    font-family: "Courier New", monospace;
+}
+
+.cover-date {
+    font-size: 10pt;
+    color: #888888;
+    margin-top: 2mm;
+}
+
+.cover-stats {
+    margin-top: 6mm;
+    display: flex;
+    gap: 12mm;
+    justify-content: center;
+}
+
+.cover-stat {
+    text-align: center;
+}
+
+.cover-stat-value {
+    font-size: 22pt;
+    font-weight: 700;
+    color: #1e3a5f;
+}
+
+.cover-stat-label {
+    font-size: 9pt;
+    color: #666666;
+    margin-top: 1mm;
+}
+
+.cover-stat-rpm {
+    font-size: 9pt;
+    color: #999999;
+}
+
+/* =====================================================================
+   Section headers
+   ===================================================================== */
+h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #1e3a5f;
+    margin-top: 8mm;
+    margin-bottom: 3mm;
+    padding-bottom: 2mm;
+    border-bottom: 2px solid #1e3a5f;
+}
+
+h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #1e3a5f;
+    margin-top: 5mm;
+    margin-bottom: 2mm;
+}
+
+h4 {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+}
+
+/* =====================================================================
+   Tables
+   ===================================================================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-bottom: 4mm;
+}
+
+th {
+    background-color: #1e3a5f;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 3mm 3mm;
+    text-align: left;
+    font-size: 9pt;
+}
+
+td {
+    padding: 2mm 3mm;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+}
+
+tr:nth-child(even) td {
+    background-color: #f4f6f8;
+}
+
+/* Config param tables: narrower parameter column */
+.config-table td:first-child {
+    font-weight: 500;
+    width: 45%;
+}
+
+.config-table td:nth-child(2) {
+    font-family: "Courier New", monospace;
+    font-size: 9pt;
+    width: 35%;
+}
+
+.config-table td:nth-child(3) {
+    color: #666666;
+    font-size: 8.5pt;
+    width: 20%;
+}
+
+/* Performance data table */
+.perf-table {
+    font-size: 8.5pt;
+}
+
+.perf-table td {
+    font-family: "Courier New", monospace;
+    padding: 1.5mm 2mm;
+}
+
+.perf-table td:first-child {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+}
+
+/* Convergence table */
+.converged-yes {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.converged-no {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* =====================================================================
+   Charts
+   ===================================================================== */
+.chart-container {
+    width: 100%;
+    margin-bottom: 4mm;
+    page-break-inside: avoid;
+}
+
+.chart-container svg {
+    width: 100%;
+    height: auto;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+}
+
+.chart-grid .chart-container {
+    margin-bottom: 0;
+}
+
+/* =====================================================================
+   Page breaks
+   ===================================================================== */
+.page-break {
+    page-break-before: always;
+}
+
+.appendix-section {
+    page-break-before: always;
+}
+
+.no-break {
+    page-break-inside: avoid;
+}
+
+/* =====================================================================
+   Miscellaneous
+   ===================================================================== */
+.text-muted {
+    color: #888888;
+    font-size: 8.5pt;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5mm 2mm;
+    border-radius: 2px;
+    font-size: 8pt;
+    font-weight: 600;
+}
+
+.badge-green {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-red {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+}
+
+.section {
+    margin-bottom: 6mm;
+}
+</style>
+</head>
+<body>
+
+<!-- ===================================================================
+     COVER PAGE
+     =================================================================== -->
+<div class="cover">
+    <div class="cover-title">Engine Simulation</div>
+    <div class="cover-subtitle">Performance Sweep Report</div>
+    <div class="cover-accent-line"></div>
+    <div class="cover-config">{{ config_name }}</div>
+    <div class="cover-date">Generated: {{ sweep_date }}</div>
+    <div class="cover-accent-line"></div>
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <div class="cover-stat-value">{{ "%.1f"|format(peak_power_hp) }} HP</div>
+            <div class="cover-stat-label">Peak Brake Power</div>
+            <div class="cover-stat-rpm">@ {{ peak_power_rpm|int }} RPM</div>
+        </div>
+        <div class="cover-stat">
+            <div class="cover-stat-value">{{ "%.1f"|format(peak_torque_nm) }} Nm</div>
+            <div class="cover-stat-label">Peak Brake Torque</div>
+            <div class="cover-stat-rpm">@ {{ peak_torque_rpm|int }} RPM</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ===================================================================
+     SECTION 1: ENGINE CONFIGURATION
+     =================================================================== -->
+<div class="section">
+<h2>1. Engine Configuration</h2>
+
+<!-- 1.1 General -->
+<h3>1.1 General</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Number of Cylinders</td><td>{{ engine_config.n_cylinders }}</td><td>—</td></tr>
+        <tr><td>Firing Order</td><td>{{ engine_config.firing_order | join(" – ") }}</td><td>—</td></tr>
+        <tr><td>Firing Interval</td><td>{{ "%.1f"|format(engine_config.firing_interval) }}</td><td>deg</td></tr>
+        <tr><td>Ambient Pressure</td><td>{{ "%.0f"|format(engine_config.p_ambient) }}</td><td>Pa</td></tr>
+        <tr><td>Ambient Temperature</td><td>{{ "%.1f"|format(engine_config.T_ambient) }}</td><td>K</td></tr>
+        <tr><td>Drivetrain Efficiency</td><td>{{ "%.3f"|format(engine_config.drivetrain_efficiency) }}</td><td>—</td></tr>
+    </tbody>
+</table>
+
+<!-- 1.2 Cylinder Geometry -->
+<h3>1.2 Cylinder Geometry</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Bore</td><td>{{ "%.1f"|format(engine_config.cylinder.bore * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Stroke</td><td>{{ "%.1f"|format(engine_config.cylinder.stroke * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Con-Rod Length</td><td>{{ "%.1f"|format(engine_config.cylinder.con_rod_length * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Compression Ratio</td><td>{{ "%.2f"|format(engine_config.cylinder.compression_ratio) }}</td><td>:1</td></tr>
+        <tr><td>Intake Valves / Cyl</td><td>{{ engine_config.cylinder.n_intake_valves }}</td><td>—</td></tr>
+        <tr><td>Exhaust Valves / Cyl</td><td>{{ engine_config.cylinder.n_exhaust_valves }}</td><td>—</td></tr>
+    </tbody>
+</table>
+
+<!-- 1.3 Intake Valve -->
+<div class="two-col">
+<div>
+<h3>1.3 Intake Valve</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Diameter</td><td>{{ "%.1f"|format(engine_config.intake_valve.diameter * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Max Lift</td><td>{{ "%.3f"|format(engine_config.intake_valve.max_lift * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Open Angle</td><td>{{ "%.1f"|format(engine_config.intake_valve.open_angle) }}</td><td>deg ATDC</td></tr>
+        <tr><td>Close Angle</td><td>{{ "%.1f"|format(engine_config.intake_valve.close_angle) }}</td><td>deg ATDC</td></tr>
+        <tr><td>Seat Angle</td><td>{{ "%.1f"|format(engine_config.intake_valve.seat_angle) }}</td><td>deg</td></tr>
+    </tbody>
+</table>
+<h4>Intake Valve Cd Table</h4>
+<table>
+    <thead>
+        <tr><th>Lift Ratio</th><th>Cd</th></tr>
+    </thead>
+    <tbody>
+        {% for row in engine_config.intake_valve.cd_table %}
+        <tr><td>{{ "%.3f"|format(row[0]) }}</td><td>{{ "%.4f"|format(row[1]) }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!-- 1.4 Exhaust Valve -->
+<div>
+<h3>1.4 Exhaust Valve</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Diameter</td><td>{{ "%.1f"|format(engine_config.exhaust_valve.diameter * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Max Lift</td><td>{{ "%.3f"|format(engine_config.exhaust_valve.max_lift * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Open Angle</td><td>{{ "%.1f"|format(engine_config.exhaust_valve.open_angle) }}</td><td>deg ATDC</td></tr>
+        <tr><td>Close Angle</td><td>{{ "%.1f"|format(engine_config.exhaust_valve.close_angle) }}</td><td>deg ATDC</td></tr>
+        <tr><td>Seat Angle</td><td>{{ "%.1f"|format(engine_config.exhaust_valve.seat_angle) }}</td><td>deg</td></tr>
+    </tbody>
+</table>
+<h4>Exhaust Valve Cd Table</h4>
+<table>
+    <thead>
+        <tr><th>Lift Ratio</th><th>Cd</th></tr>
+    </thead>
+    <tbody>
+        {% for row in engine_config.exhaust_valve.cd_table %}
+        <tr><td>{{ "%.3f"|format(row[0]) }}</td><td>{{ "%.4f"|format(row[1]) }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+<!-- 1.5 Intake Pipes -->
+<h3>1.5 Intake Pipes</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Length (mm)</th>
+            <th>Bore In (mm)</th>
+            <th>Bore Out (mm)</th>
+            <th>Points</th>
+            <th>T_wall (K)</th>
+            <th>Roughness (m)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in engine_config.intake_pipes %}
+        <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ "%.1f"|format(p.length * 1000) }}</td>
+            <td>{{ "%.1f"|format(p.diameter * 1000) }}</td>
+            <td>{% if p.diameter_out is not none %}{{ "%.1f"|format(p.diameter_out * 1000) }}{% else %}—{% endif %}</td>
+            <td>{{ p.n_points }}</td>
+            <td>{{ "%.0f"|format(p.wall_temperature) }}</td>
+            <td>{{ "%.2e"|format(p.roughness) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 1.6 Exhaust Primaries -->
+<h3>1.6 Exhaust Primaries</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Length (mm)</th>
+            <th>Bore In (mm)</th>
+            <th>Bore Out (mm)</th>
+            <th>Points</th>
+            <th>T_wall (K)</th>
+            <th>Roughness (m)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in engine_config.exhaust_primaries %}
+        <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ "%.1f"|format(p.length * 1000) }}</td>
+            <td>{{ "%.1f"|format(p.diameter * 1000) }}</td>
+            <td>{% if p.diameter_out is not none %}{{ "%.1f"|format(p.diameter_out * 1000) }}{% else %}—{% endif %}</td>
+            <td>{{ p.n_points }}</td>
+            <td>{{ "%.0f"|format(p.wall_temperature) }}</td>
+            <td>{{ "%.2e"|format(p.roughness) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if engine_config.exhaust_secondaries %}
+<!-- 1.7 Exhaust Secondaries -->
+<h3>1.7 Exhaust Secondaries</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Length (mm)</th>
+            <th>Bore In (mm)</th>
+            <th>Bore Out (mm)</th>
+            <th>Points</th>
+            <th>T_wall (K)</th>
+            <th>Roughness (m)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in engine_config.exhaust_secondaries %}
+        <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ "%.1f"|format(p.length * 1000) }}</td>
+            <td>{{ "%.1f"|format(p.diameter * 1000) }}</td>
+            <td>{% if p.diameter_out is not none %}{{ "%.1f"|format(p.diameter_out * 1000) }}{% else %}—{% endif %}</td>
+            <td>{{ p.n_points }}</td>
+            <td>{{ "%.0f"|format(p.wall_temperature) }}</td>
+            <td>{{ "%.2e"|format(p.roughness) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- 1.8 Exhaust Collector -->
+<h3>1.8 Exhaust Collector</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Name</td><td>{{ engine_config.exhaust_collector.name }}</td><td>—</td></tr>
+        <tr><td>Length</td><td>{{ "%.1f"|format(engine_config.exhaust_collector.length * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Diameter</td><td>{{ "%.1f"|format(engine_config.exhaust_collector.diameter * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Diameter Out</td><td>{% if engine_config.exhaust_collector.diameter_out is not none %}{{ "%.1f"|format(engine_config.exhaust_collector.diameter_out * 1000) }}{% else %}—{% endif %}</td><td>mm</td></tr>
+        <tr><td>Grid Points</td><td>{{ engine_config.exhaust_collector.n_points }}</td><td>—</td></tr>
+        <tr><td>Wall Temperature</td><td>{{ "%.0f"|format(engine_config.exhaust_collector.wall_temperature) }}</td><td>K</td></tr>
+        <tr><td>Roughness</td><td>{{ "%.2e"|format(engine_config.exhaust_collector.roughness) }}</td><td>m</td></tr>
+    </tbody>
+</table>
+
+<!-- 1.9 Combustion -->
+<h3>1.9 Combustion Model</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Wiebe a</td><td>{{ "%.2f"|format(engine_config.combustion.wiebe_a) }}</td><td>—</td></tr>
+        <tr><td>Wiebe m</td><td>{{ "%.2f"|format(engine_config.combustion.wiebe_m) }}</td><td>—</td></tr>
+        <tr><td>Combustion Duration</td><td>{{ "%.1f"|format(engine_config.combustion.combustion_duration) }}</td><td>deg</td></tr>
+        <tr><td>Spark Advance</td><td>{{ "%.1f"|format(engine_config.combustion.spark_advance) }}</td><td>deg BTDC</td></tr>
+        <tr><td>Ignition Delay</td><td>{{ "%.1f"|format(engine_config.combustion.ignition_delay) }}</td><td>deg</td></tr>
+        <tr><td>Combustion Efficiency</td><td>{{ "%.3f"|format(engine_config.combustion.combustion_efficiency) }}</td><td>—</td></tr>
+        <tr><td>LHV</td><td>{{ "%.3e"|format(engine_config.combustion.q_lhv) }}</td><td>J/kg</td></tr>
+        <tr><td>AFR Stoich</td><td>{{ "%.2f"|format(engine_config.combustion.afr_stoich) }}</td><td>—</td></tr>
+        <tr><td>AFR Target</td><td>{{ "%.2f"|format(engine_config.combustion.afr_target) }}</td><td>—</td></tr>
+    </tbody>
+</table>
+
+<!-- 1.10 Restrictor -->
+<div class="two-col">
+<div>
+<h3>1.10 Restrictor</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Throat Diameter</td><td>{{ "%.1f"|format(engine_config.restrictor.throat_diameter * 1000) }}</td><td>mm</td></tr>
+        <tr><td>Discharge Coeff. (Cd)</td><td>{{ "%.3f"|format(engine_config.restrictor.discharge_coefficient) }}</td><td>—</td></tr>
+        <tr><td>Converging Half-Angle</td><td>{{ "%.1f"|format(engine_config.restrictor.converging_half_angle) }}</td><td>deg</td></tr>
+        <tr><td>Diverging Half-Angle</td><td>{{ "%.1f"|format(engine_config.restrictor.diverging_half_angle) }}</td><td>deg</td></tr>
+    </tbody>
+</table>
+</div>
+
+<!-- 1.11 Plenum -->
+<div>
+<h3>1.11 Plenum</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Volume</td><td>{{ "%.4f"|format(engine_config.plenum.volume) }}</td><td>m³</td></tr>
+        <tr><td>Initial Pressure</td><td>{{ "%.0f"|format(engine_config.plenum.initial_pressure) }}</td><td>Pa</td></tr>
+        <tr><td>Initial Temperature</td><td>{{ "%.1f"|format(engine_config.plenum.initial_temperature) }}</td><td>K</td></tr>
+    </tbody>
+</table>
+</div>
+</div>
+
+<!-- 1.12 Simulation Parameters -->
+<h3>1.12 Simulation Parameters</h3>
+<table class="config-table">
+    <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Unit</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>RPM Start</td><td>{{ "%.0f"|format(engine_config.simulation.rpm_start) }}</td><td>RPM</td></tr>
+        <tr><td>RPM End</td><td>{{ "%.0f"|format(engine_config.simulation.rpm_end) }}</td><td>RPM</td></tr>
+        <tr><td>RPM Step</td><td>{{ "%.0f"|format(engine_config.simulation.rpm_step) }}</td><td>RPM</td></tr>
+        <tr><td>Cycles per Point</td><td>{{ "%.0f"|format(engine_config.simulation.n_cycles) }}</td><td>—</td></tr>
+        <tr><td>CFL Number</td><td>{{ "%.3f"|format(engine_config.simulation.cfl_number) }}</td><td>—</td></tr>
+        <tr><td>Convergence Tolerance</td><td>{{ "%.4e"|format(engine_config.simulation.convergence_tolerance) }}</td><td>—</td></tr>
+        <tr><td>Max Crank Step</td><td>{{ "%.2f"|format(engine_config.simulation.crank_step_max) }}</td><td>deg</td></tr>
+        <tr><td>Artificial Viscosity</td><td>{{ "%.4f"|format(engine_config.simulation.artificial_viscosity) }}</td><td>—</td></tr>
+    </tbody>
+</table>
+</div>
+
+
+<!-- ===================================================================
+     SECTION 2: PERFORMANCE SWEEP CURVES
+     =================================================================== -->
+<div class="section page-break">
+<h2>2. Performance Sweep Curves</h2>
+
+{% if sweep_curve_svgs %}
+{% for svg in sweep_curve_svgs %}
+<div class="chart-container no-break">
+{{ svg }}
+</div>
+{% endfor %}
+{% else %}
+<p class="text-muted">No sweep curve data available.</p>
+{% endif %}
+</div>
+
+
+<!-- ===================================================================
+     SECTION 3: PERFORMANCE DATA TABLE
+     =================================================================== -->
+<div class="section page-break">
+<h2>3. Performance Data</h2>
+
+<table class="perf-table">
+    <thead>
+        <tr>
+            <th>RPM</th>
+            <th>Brake HP</th>
+            <th>Brake Nm</th>
+            <th>VE atm (%)</th>
+            <th>IMEP (bar)</th>
+            <th>BMEP (bar)</th>
+            <th>Plen (bar)</th>
+            <th>Restr ṁ (g/s)</th>
+            <th>Choked</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in perf_data %}
+        <tr>
+            <td>{{ p.rpm|int }}</td>
+            <td>{{ "%.2f"|format(p.brake_power_hp) }}</td>
+            <td>{{ "%.2f"|format(p.brake_torque_Nm) }}</td>
+            <td>{{ "%.1f"|format(p.volumetric_efficiency_atm * 100) }}</td>
+            <td>{{ "%.3f"|format(p.imep_bar) }}</td>
+            <td>{{ "%.3f"|format(p.bmep_bar) }}</td>
+            <td>{{ "%.4f"|format(p.plenum_pressure_bar) }}</td>
+            <td>{{ "%.3f"|format(p.restrictor_mdot * 1000) }}</td>
+            <td>{% if p.restrictor_choked %}<span class="badge badge-red">YES</span>{% else %}<span class="badge badge-green">NO</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
+<!-- ===================================================================
+     SECTION 4: CONVERGENCE SUMMARY
+     =================================================================== -->
+<div class="section page-break">
+<h2>4. Convergence Summary</h2>
+
+{% if convergence_overview_svg %}
+<div class="chart-container no-break">
+{{ convergence_overview_svg }}
+</div>
+{% endif %}
+
+<table>
+    <thead>
+        <tr>
+            <th>RPM</th>
+            <th>Status</th>
+            <th>Cycles</th>
+            <th>Final Δ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in convergence_table %}
+        <tr>
+            <td>{{ row.rpm|int }}</td>
+            <td>
+                {% if row.converged %}
+                <span class="converged-yes">Converged</span>
+                {% else %}
+                <span class="converged-no">Not converged</span>
+                {% endif %}
+            </td>
+            <td>{{ row.cycles }}</td>
+            <td>{{ row.final_delta }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
+<!-- ===================================================================
+     APPENDIX: PER-RPM DETAIL PAGES
+     =================================================================== -->
+{% for page in rpm_detail_pages %}
+<div class="appendix-section">
+<h2>Appendix — RPM Detail: {{ page.rpm|int }}</h2>
+
+{% if page.cylinder_svgs %}
+<h3>Cylinder Traces</h3>
+{% for svg in page.cylinder_svgs %}
+<div class="chart-container no-break">
+{{ svg }}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if page.pv_svg %}
+<h3>P-V Diagram</h3>
+<div class="chart-container no-break">
+{{ page.pv_svg }}
+</div>
+{% endif %}
+
+{% if page.pipe_svgs %}
+<h3>Pipe Traces</h3>
+{% for svg in page.pipe_svgs %}
+<div class="chart-container no-break">
+{{ svg }}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if page.plenum_svg %}
+<h3>Plenum Conditions</h3>
+<div class="chart-container no-break">
+{{ page.plenum_svg }}
+</div>
+{% endif %}
+
+{% if page.restrictor_svg %}
+<h3>Restrictor Mass Flow</h3>
+<div class="chart-container no-break">
+{{ page.restrictor_svg }}
+</div>
+{% endif %}
+
+{% if page.convergence_svgs %}
+<h3>Convergence History</h3>
+{% for svg in page.convergence_svgs %}
+<div class="chart-container no-break">
+{{ svg }}
+</div>
+{% endfor %}
+{% endif %}
+
+</div>
+{% endfor %}
+
+</body>
+</html>
