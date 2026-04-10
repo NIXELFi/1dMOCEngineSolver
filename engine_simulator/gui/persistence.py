@@ -177,6 +177,19 @@ def save_sweep(state, sweeps_dir: str) -> str:
             str(rpm): _serialize_results(results)
             for rpm, results in state.results_by_rpm.items()
         },
+        "convergence": {
+            str(rpm): {
+                "delta_history": _coerce_jsonable(
+                    rpm_state.get("delta_history", [])
+                ),
+                "p_ivc_history": _coerce_jsonable(
+                    rpm_state.get("p_ivc_history", [])
+                ),
+                "converged": rpm_state.get("converged", False),
+                "converged_at_cycle": rpm_state.get("converged_at_cycle"),
+            }
+            for rpm, rpm_state in state.rpms.items()
+        },
     }
 
     with open(tmp_path, "w") as f:
@@ -220,6 +233,24 @@ def load_sweep(file_path: str):
         for rpm, rd in data.get("results_by_rpm", {}).items()
     }
 
+    rpms = {
+        float(p["rpm"]): {
+            "status": "done",
+            "rpm_index": idx,
+            "perf": p,
+        }
+        for idx, p in enumerate(data.get("perf", []))
+    }
+
+    convergence = data.get("convergence", {})
+    for rpm_str, conv_data in convergence.items():
+        rpm_key = float(rpm_str)
+        if rpm_key in rpms:
+            rpms[rpm_key]["delta_history"] = conv_data.get("delta_history", [])
+            rpms[rpm_key]["p_ivc_history"] = conv_data.get("p_ivc_history", [])
+            rpms[rpm_key]["converged"] = conv_data.get("converged", False)
+            rpms[rpm_key]["converged_at_cycle"] = conv_data.get("converged_at_cycle")
+
     state = LiveSweepState(
         sweep_id=data["sweep_id"],
         status="complete",
@@ -230,14 +261,7 @@ def load_sweep(file_path: str):
         n_workers=data["metadata"].get("n_workers_effective", 0),
         started_at=data["metadata"].get("started_at", ""),
         completed_at=data["metadata"].get("completed_at"),
-        rpms={
-            float(p["rpm"]): {
-                "status": "done",
-                "rpm_index": idx,
-                "perf": p,
-            }
-            for idx, p in enumerate(data.get("perf", []))
-        },
+        rpms=rpms,
         results_by_rpm=results_by_rpm,
         sweep_results=data.get("perf", []),
     )
