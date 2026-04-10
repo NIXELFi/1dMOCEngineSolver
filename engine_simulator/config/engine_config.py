@@ -117,13 +117,11 @@ class EngineConfig:
     )
 
     # Cd tables: bench-measured values (0.20…0.60 at peak L/D) multiplied by
-    # an in-engine effective-Cd factor of 0.78. 1D MOC misses several real
-    # losses (port-to-runner sudden contraction, valve seat / port radius,
-    # boundary-layer separation around the back side of the valve, secondary
-    # flow rotation, finite-amplitude inertial effects), so the on-engine
-    # effective Cd is typically 70–85 % of the static-bench Cd. 0.78 lands
-    # peak brake power around 71 hp at 8000 RPM, which is close to the
-    # SDM26 team's chassis-dyno expectation.
+    # an in-engine effective-Cd factor of 0.95. The remaining 5% deduction
+    # accounts for port-to-runner contraction and boundary-layer effects
+    # that a 1D model can't resolve. Calibrated against DynoJet data to
+    # sustain VE in the 80-95% range through the high-RPM restrictor-choked
+    # regime where the cylinder must pump efficiently to maintain power.
     intake_valve: ValveConfig = field(
         default_factory=lambda: ValveConfig(
             diameter=0.0275,
@@ -131,12 +129,12 @@ class EngineConfig:
             open_angle=338.0,
             close_angle=583.0,
             cd_table=[
-                (0.05, 0.156),  # 0.20 × 0.78
-                (0.10, 0.312),  # 0.40 × 0.78
-                (0.15, 0.406),  # 0.52 × 0.78
-                (0.20, 0.452),  # 0.58 × 0.78
-                (0.25, 0.468),  # 0.60 × 0.78
-                (0.30, 0.468),
+                (0.05, 0.190),  # 0.20 × 0.95
+                (0.10, 0.380),  # 0.40 × 0.95
+                (0.15, 0.494),  # 0.52 × 0.95
+                (0.20, 0.551),  # 0.58 × 0.95
+                (0.25, 0.570),  # 0.60 × 0.95
+                (0.30, 0.570),
             ],
         )
     )
@@ -148,12 +146,12 @@ class EngineConfig:
             open_angle=140.0,
             close_angle=365.0,
             cd_table=[
-                (0.05, 0.140),  # 0.18 × 0.78
-                (0.10, 0.273),  # 0.35 × 0.78
-                (0.15, 0.374),  # 0.48 × 0.78
-                (0.20, 0.429),  # 0.55 × 0.78
-                (0.25, 0.445),  # 0.57 × 0.78
-                (0.30, 0.452),  # 0.58 × 0.78
+                (0.05, 0.171),  # 0.18 × 0.95
+                (0.10, 0.333),  # 0.35 × 0.95
+                (0.15, 0.456),  # 0.48 × 0.95
+                (0.20, 0.523),  # 0.55 × 0.95
+                (0.25, 0.542),  # 0.57 × 0.95
+                (0.30, 0.551),  # 0.58 × 0.95
             ],
         )
     )

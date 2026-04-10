@@ -226,6 +226,56 @@ class SimulationOrchestrator:
         self.restrictor_plenum.T = cfg.T_ambient
         self.restrictor_plenum.m = cfg.p_ambient * cfg.plenum.volume / (287.0 * cfg.T_ambient)
 
+        # --- RPM-dependent combustion corrections ---------------------------
+        # The Wiebe model uses fixed crank-angle parameters, but real SI
+        # combustion quality degrades at low RPM:
+        #   - Less in-cylinder turbulence → slower flame propagation
+        #   - Longer real-time burn → more heat loss to walls during burn
+        #   - Greater cycle-to-cycle variation → effective efficiency drop
+        # We correct for this by scaling combustion duration and efficiency
+        # as functions of RPM, referenced to a "design point" RPM where the
+        # base config values are calibrated (typically peak-power RPM).
+        #
+        # The spark advance map is a simple linear ramp: full advance above
+        # a threshold RPM, retarded below (real ECUs do this via MAP×RPM
+        # lookup; this is a first-order approximation).
+        rpm_ref = 10500.0  # RPM where base combustion params are calibrated
+        rpm_lo = 3500.0   # below this, maximum degradation applied
+
+        base_duration = cfg.combustion.combustion_duration
+        base_advance = cfg.combustion.spark_advance
+        base_efficiency = cfg.combustion.combustion_efficiency
+
+        # Duration scales as (rpm_ref / rpm)^0.3 — Heywood Ch.9 empirical:
+        # burn duration in crank degrees ~ RPM^0.7 (turbulent flame speed
+        # scales with piston speed, but not linearly). At low RPM the
+        # duration in degrees shrinks, but the REAL issue is that the burn
+        # is so slow in absolute time that heat losses during combustion
+        # eat the work. We model this as an effective duration stretch.
+        rpm_clamped = max(rpm, rpm_lo)
+        duration_factor = (rpm_ref / rpm_clamped) ** 0.3
+        duration_factor = min(duration_factor, 2.0)  # cap at 2× base
+
+        # Spark retard at low RPM: linearly reduce advance below rpm_ref,
+        # floored at 40% of base advance (≈10° for base 25°).
+        advance_factor = min(1.0, 0.4 + 0.6 * (rpm_clamped - rpm_lo) / (rpm_ref - rpm_lo))
+
+        # Combustion efficiency: degrades at low RPM due to partial burns
+        # and quenching. Linear ramp from 75% of base at rpm_lo to 100%
+        # at rpm_ref.
+        efficiency_factor = min(1.0, 0.75 + 0.25 * (rpm_clamped - rpm_lo) / (rpm_ref - rpm_lo))
+
+        adj_duration = base_duration * duration_factor
+        adj_advance = base_advance * advance_factor
+        adj_efficiency = base_efficiency * efficiency_factor
+
+        for cyl in self.cylinders:
+            comb = cyl.combustion
+            comb.combustion_duration = adj_duration
+            comb.spark_advance = adj_advance
+            comb.combustion_efficiency = adj_efficiency
+            comb._update_angles()
+
     def run_single_rpm(
         self,
         rpm: float,
