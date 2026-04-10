@@ -1,7 +1,12 @@
 {
     "name": "Honda CBR600RR (FSAE)",
     "n_cylinders": 4,
-    "firing_order": [1, 2, 4, 3],
+    "firing_order": [
+        1,
+        2,
+        4,
+        3
+    ],
     "firing_interval": 180.0,
     "cylinder": {
         "bore": 0.067,
@@ -18,12 +23,30 @@
         "close_angle": 583.0,
         "seat_angle": 45.0,
         "cd_table": [
-            [0.05, 0.190],
-            [0.10, 0.380],
-            [0.15, 0.494],
-            [0.20, 0.551],
-            [0.25, 0.570],
-            [0.30, 0.570]
+            [
+                0.05,
+                0.19
+            ],
+            [
+                0.1,
+                0.38
+            ],
+            [
+                0.15,
+                0.494
+            ],
+            [
+                0.2,
+                0.551
+            ],
+            [
+                0.25,
+                0.57
+            ],
+            [
+                0.3,
+                0.57
+            ]
         ]
     },
     "exhaust_valve": {
@@ -33,37 +56,136 @@
         "close_angle": 365.0,
         "seat_angle": 45.0,
         "cd_table": [
-            [0.05, 0.171],
-            [0.10, 0.333],
-            [0.15, 0.456],
-            [0.20, 0.523],
-            [0.25, 0.542],
-            [0.30, 0.551]
+            [
+                0.05,
+                0.171
+            ],
+            [
+                0.1,
+                0.333
+            ],
+            [
+                0.15,
+                0.456
+            ],
+            [
+                0.2,
+                0.523
+            ],
+            [
+                0.25,
+                0.542
+            ],
+            [
+                0.3,
+                0.551
+            ]
         ]
     },
     "intake_pipes": [
-        {"name": "intake_runner_1", "length": 0.250, "diameter": 0.038, "n_points": 30, "wall_temperature": 325.0, "roughness": 3e-05},
-        {"name": "intake_runner_2", "length": 0.250, "diameter": 0.038, "n_points": 30, "wall_temperature": 325.0, "roughness": 3e-05},
-        {"name": "intake_runner_3", "length": 0.250, "diameter": 0.038, "n_points": 30, "wall_temperature": 325.0, "roughness": 3e-05},
-        {"name": "intake_runner_4", "length": 0.250, "diameter": 0.038, "n_points": 30, "wall_temperature": 325.0, "roughness": 3e-05}
+        {
+            "name": "intake_runner_1",
+            "length": 0.245,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 325.0,
+            "roughness": 0.00003
+        },
+        {
+            "name": "intake_runner_2",
+            "length": 0.245,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 325.0,
+            "roughness": 0.00003
+        },
+        {
+            "name": "intake_runner_3",
+            "length": 0.245,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 325.0,
+            "roughness": 0.00003
+        },
+        {
+            "name": "intake_runner_4",
+            "length": 0.245,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 325.0,
+            "roughness": 0.00003
+        }
     ],
     "exhaust_primaries": [
-        {"name": "exhaust_primary_1", "length": 0.450, "diameter": 0.034, "n_points": 30, "wall_temperature": 650.0, "roughness": 4.6e-05},
-        {"name": "exhaust_primary_2", "length": 0.450, "diameter": 0.034, "n_points": 30, "wall_temperature": 650.0, "roughness": 4.6e-05},
-        {"name": "exhaust_primary_3", "length": 0.450, "diameter": 0.034, "n_points": 30, "wall_temperature": 650.0, "roughness": 4.6e-05},
-        {"name": "exhaust_primary_4", "length": 0.450, "diameter": 0.034, "n_points": 30, "wall_temperature": 650.0, "roughness": 4.6e-05}
+        {
+            "name": "exhaust_primary_1",
+            "length": 0.308,
+            "diameter": 0.032,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 650.0,
+            "roughness": 0.000046
+        },
+        {
+            "name": "exhaust_primary_2",
+            "length": 0.308,
+            "diameter": 0.032,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 650.0,
+            "roughness": 0.000046
+        },
+        {
+            "name": "exhaust_primary_3",
+            "length": 0.308,
+            "diameter": 0.034,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 650.0,
+            "roughness": 0.000046
+        },
+        {
+            "name": "exhaust_primary_4",
+            "length": 0.308,
+            "diameter": 0.034,
+            "diameter_out": null,
+            "n_points": 30,
+            "wall_temperature": 650.0,
+            "roughness": 0.000046
+        }
     ],
     "exhaust_secondaries": [
-        {"name": "exhaust_secondary_1", "length": 0.300, "diameter": 0.042, "n_points": 20, "wall_temperature": 550.0, "roughness": 4.6e-05},
-        {"name": "exhaust_secondary_2", "length": 0.300, "diameter": 0.042, "n_points": 20, "wall_temperature": 550.0, "roughness": 4.6e-05}
+        {
+            "name": "exhaust_secondary_1",
+            "length": 0.392,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 20,
+            "wall_temperature": 550.0,
+            "roughness": 0.000046
+        },
+        {
+            "name": "exhaust_secondary_2",
+            "length": 0.392,
+            "diameter": 0.038,
+            "diameter_out": null,
+            "n_points": 20,
+            "wall_temperature": 550.0,
+            "roughness": 0.000046
+        }
     ],
     "exhaust_collector": {
         "name": "exhaust_collector",
-        "length": 0.400,
-        "diameter": 0.050,
+        "length": 0.1,
+        "diameter": 0.05,
+        "diameter_out": null,
         "n_points": 20,
         "wall_temperature": 500.0,
-        "roughness": 4.6e-05
+        "roughness": 0.000046
     },
     "combustion": {
         "wiebe_a": 5.0,
@@ -77,13 +199,13 @@
         "afr_target": 13.1
     },
     "restrictor": {
-        "throat_diameter": 0.020,
+        "throat_diameter": 0.02,
         "discharge_coefficient": 0.95,
         "converging_half_angle": 12.0,
         "diverging_half_angle": 6.0
     },
     "plenum": {
-        "volume": 0.0035,
+        "volume": 0.0015,
         "initial_pressure": 101325.0,
         "initial_temperature": 300.0
     },
@@ -94,8 +216,10 @@
         "n_cycles": 5,
         "cfl_number": 0.85,
         "convergence_tolerance": 0.005,
-        "crank_step_max": 1.0
+        "crank_step_max": 1.0,
+        "artificial_viscosity": 0.05
     },
     "p_ambient": 101325.0,
-    "T_ambient": 300.0
+    "T_ambient": 300.0,
+    "drivetrain_efficiency": 1.0
 }
