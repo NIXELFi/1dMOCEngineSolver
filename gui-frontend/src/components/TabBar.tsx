@@ -9,6 +9,7 @@ interface TabDef {
 const TABS: TabDef[] = [
   { id: "simulation", label: "Simulation", index: "01" },
   { id: "config", label: "Config", index: "02" },
+  { id: "dyno", label: "Dyno", index: "03" },
 ];
 
 /**

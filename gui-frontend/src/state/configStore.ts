@@ -101,7 +101,7 @@ export type ValveKey = "intake_valve" | "exhaust_valve";
 /* Store                                                                      */
 /* ========================================================================== */
 
-export type ActiveTab = "simulation" | "config";
+export type ActiveTab = "simulation" | "config" | "dyno";
 
 export interface ConfigStore {
   // Catalog

@@ -4,6 +4,7 @@ import TabBar from "./components/TabBar";
 import RunSweepDialog from "./components/RunSweepDialog";
 import SimulationView from "./components/SimulationView";
 import ConfigView from "./components/ConfigView";
+import DynoView from "./components/DynoView";
 import SweepListSidebar from "./components/SweepListSidebar";
 import { makeEventSocket } from "./api/websocket";
 import { applyServerMessage } from "./state/eventReducer";
@@ -34,7 +35,9 @@ export default function App() {
       <TabBar />
 
       <div className="flex-1 flex overflow-hidden">
-        {activeTab === "simulation" ? <SimulationView /> : <ConfigView />}
+        {activeTab === "simulation" && <SimulationView />}
+        {activeTab === "config" && <ConfigView />}
+        {activeTab === "dyno" && <DynoView />}
         <SweepListSidebar />
       </div>
 
