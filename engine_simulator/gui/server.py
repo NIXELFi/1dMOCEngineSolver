@@ -27,11 +27,15 @@ logger = logging.getLogger(__name__)
 # (routes_api, routes_ws) import this to access the SweepManager.
 sweep_manager = None
 
+# Module-level singleton for the ParametricStudyManager, set during lifespan
+# startup. routes_parametric imports this to access the manager.
+parametric_manager = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """ASGI lifespan: starts the SweepManager on startup, cleans up on shutdown."""
-    global sweep_manager
+    global sweep_manager, parametric_manager
     import asyncio
 
     loop = asyncio.get_running_loop()
@@ -48,6 +52,23 @@ async def lifespan(app: FastAPI):
     except ImportError:
         logger.warning("SweepManager not yet available; running in skeleton mode")
         sweep_manager = None
+
+    try:
+        from engine_simulator.gui.parametric.study_manager import (
+            ParametricStudyManager,
+        )
+        parametric_sweeps_dir = str(
+            Path(__file__).resolve().parents[2] / "sweeps" / "parametric"
+        )
+        Path(parametric_sweeps_dir).mkdir(parents=True, exist_ok=True)
+        parametric_manager = ParametricStudyManager(
+            loop=loop,
+            studies_dir=parametric_sweeps_dir,
+            broadcast_fn=broadcast,
+        )
+    except ImportError:
+        logger.warning("ParametricStudyManager not yet available")
+        parametric_manager = None
 
     yield
 
@@ -70,6 +91,9 @@ def create_app() -> FastAPI:
 
     app.include_router(routes_api.router)
     app.include_router(routes_ws.router)
+
+    from engine_simulator.gui import routes_parametric
+    app.include_router(routes_parametric.router)
 
     # Static files: pre-built React bundle
     static_dir = Path(__file__).parent / "static"
