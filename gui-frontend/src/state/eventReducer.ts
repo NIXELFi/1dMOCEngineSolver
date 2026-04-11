@@ -1,5 +1,7 @@
 import type { ServerMessage, SweepSnapshot } from "../types/events";
+import type { ParametricServerMessage } from "../types/parametric";
 import { useSweepStore } from "./sweepStore";
+import { useParametricStore } from "./parametricStore";
 
 /**
  * Normalize the rpms dict keys to JS-friendly form.
@@ -44,6 +46,13 @@ function normalizeSweep(sweep: SweepSnapshot): SweepSnapshot {
 }
 
 export function applyServerMessage(msg: ServerMessage): void {
+  // Parametric channel: route to the parametric store, don't touch the
+  // sweep store.
+  if ((msg as { channel?: string }).channel === "parametric") {
+    handleParametricMessage(msg as unknown as ParametricServerMessage);
+    return;
+  }
+
   const store = useSweepStore.getState();
 
   switch (msg.type) {
@@ -128,6 +137,65 @@ export function applyServerMessage(msg: ServerMessage): void {
 
     case "pong":
       // No-op
+      break;
+  }
+}
+
+function handleParametricMessage(msg: ParametricServerMessage): void {
+  const store = useParametricStore.getState();
+  switch (msg.type) {
+    case "parametric_snapshot":
+      store.setCurrent(msg.study);
+      break;
+
+    case "parametric_study_start":
+      store._applyStudyStart(msg.study_id, msg.definition);
+      break;
+
+    case "parametric_value_start":
+      store._applyValueStart(msg.value_index);
+      break;
+
+    case "parametric_rpm_start":
+      // No store mutation — the run is already "running" from value_start.
+      break;
+
+    case "parametric_rpm_cycle":
+      // No-op; the final perf dict arrives in parametric_rpm_done.
+      break;
+
+    case "parametric_rpm_done": {
+      // parametric_rpm_done does not carry value_index — locate the run
+      // by parameter_value instead.
+      const current = store.current;
+      if (!current) break;
+      const idx = current.runs.findIndex(
+        (r) => r.parameter_value === msg.parameter_value,
+      );
+      if (idx >= 0) {
+        store._applyRpmDone(idx, msg.rpm, msg.perf);
+      }
+      break;
+    }
+
+    case "parametric_value_done":
+      store._applyValueDone(msg.value_index, msg.run);
+      break;
+
+    case "parametric_value_error":
+      store._applyValueError(msg.value_index, msg.error_msg);
+      break;
+
+    case "parametric_study_complete":
+      store._applyStudyComplete();
+      break;
+
+    case "parametric_study_stopped":
+      store._applyStudyStopped();
+      break;
+
+    case "parametric_study_error":
+      store._applyStudyError(msg.error_msg);
       break;
   }
 }
