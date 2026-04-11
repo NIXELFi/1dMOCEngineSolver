@@ -5,6 +5,7 @@ import RunSweepDialog from "./components/RunSweepDialog";
 import SimulationView from "./components/SimulationView";
 import ConfigView from "./components/ConfigView";
 import DynoView from "./components/DynoView";
+import ParametricView from "./components/parametric/ParametricView";
 import SweepListSidebar from "./components/SweepListSidebar";
 import { makeEventSocket } from "./api/websocket";
 import { applyServerMessage } from "./state/eventReducer";
@@ -38,7 +39,8 @@ export default function App() {
         {activeTab === "simulation" && <SimulationView />}
         {activeTab === "config" && <ConfigView />}
         {activeTab === "dyno" && <DynoView />}
-        <SweepListSidebar />
+        {activeTab === "parametric" && <ParametricView />}
+        {activeTab !== "parametric" && <SweepListSidebar />}
       </div>
 
       <RunSweepDialog
