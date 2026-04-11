@@ -32,7 +32,10 @@ class ParametricRun:
     parameter_value: float
     status: Literal["queued", "running", "done", "error"] = "queued"
     sweep_results: list[dict] = field(default_factory=list)
-    per_rpm_delta: dict = field(default_factory=dict)
+    # Keys are stringified floats (JSON round-trip); the value is the
+    # last convergence delta observed for that RPM. Stored as strings
+    # because JSON does not preserve numeric dict keys.
+    per_rpm_delta: dict[str, float] = field(default_factory=dict)
     elapsed_seconds: float = 0.0
     error: Optional[str] = None
 

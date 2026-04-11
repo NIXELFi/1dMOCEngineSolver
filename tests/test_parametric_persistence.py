@@ -104,3 +104,55 @@ def test_list_studies_returns_metadata(tmp_path):
 
 def test_list_studies_returns_empty_for_missing_dir(tmp_path):
     assert list_studies(str(tmp_path / "nonexistent")) == []
+
+
+def test_load_study_raises_for_missing_file(tmp_path):
+    with pytest.raises(ValueError, match="not found"):
+        load_study(str(tmp_path / "does_not_exist.json"))
+
+
+def test_load_study_raises_for_malformed_json(tmp_path):
+    path = tmp_path / "bad.json"
+    path.write_text("{ this is not json")
+    with pytest.raises(ValueError, match="Could not parse"):
+        load_study(str(path))
+
+
+def test_load_study_raises_for_unknown_schema_version(tmp_path):
+    path = tmp_path / "future.json"
+    path.write_text(json.dumps({
+        "schema_version": 99,
+        "definition": {},
+        "status": "complete",
+        "runs": [],
+    }))
+    with pytest.raises(ValueError, match="schema_version"):
+        load_study(str(path))
+
+
+def test_load_study_raises_for_missing_definition_field(tmp_path):
+    from engine_simulator.gui.parametric.persistence import SCHEMA_VERSION
+    path = tmp_path / "partial.json"
+    path.write_text(json.dumps({
+        "schema_version": SCHEMA_VERSION,
+        "definition": {"study_id": "x"},  # missing required fields
+        "runs": [],
+    }))
+    with pytest.raises(ValueError, match="malformed"):
+        load_study(str(path))
+
+
+def test_per_rpm_delta_keys_are_strings_after_round_trip(tmp_path):
+    """Documents the JSON round-trip: float keys become strings.
+
+    The original fixture uses float keys to match what the study manager
+    will produce in memory. JSON serialization converts them to strings,
+    and load_study preserves that form.
+    """
+    study = _make_study()
+    filename = save_study(study, str(tmp_path))
+    loaded = load_study(str(tmp_path / filename))
+    keys = list(loaded.runs[0].per_rpm_delta.keys())
+    assert all(isinstance(k, str) for k in keys)
+    # The string form of the original float
+    assert "6000.0" in keys

@@ -7,41 +7,18 @@ load them independently.
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
 
 from engine_simulator.gui.parametric.study_manager import (
     LiveParametricStudy,
     ParametricRun,
     ParametricStudyDef,
 )
+from engine_simulator.gui.persistence import _coerce_jsonable
 
 
 SCHEMA_VERSION = 1
-
-
-def _coerce_jsonable(obj: Any) -> Any:
-    """Recursively coerce numpy scalars/arrays to plain Python and replace
-    non-finite floats with None so the result is JSON.parse-safe in the
-    browser.
-    """
-    import numpy as np
-    if isinstance(obj, dict):
-        return {str(k): _coerce_jsonable(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [_coerce_jsonable(v) for v in obj]
-    if isinstance(obj, np.ndarray):
-        return _coerce_jsonable(obj.tolist())
-    if isinstance(obj, np.floating):
-        v = float(obj.item())
-        return v if math.isfinite(v) else None
-    if isinstance(obj, (np.integer, np.bool_)):
-        return obj.item()
-    if isinstance(obj, float):
-        return obj if math.isfinite(obj) else None
-    return obj
 
 
 def save_study(study: LiveParametricStudy, studies_dir: str) -> str:
@@ -65,14 +42,32 @@ def save_study(study: LiveParametricStudy, studies_dir: str) -> str:
 
 
 def load_study(path: str) -> LiveParametricStudy:
-    """Load a study from the given JSON file path."""
-    with open(path) as f:
-        payload = json.load(f)
+    """Load a study from the given JSON file path.
 
-    def_data = payload["definition"]
-    definition = ParametricStudyDef(**def_data)
+    Raises ValueError for missing files, malformed JSON, unknown schema
+    versions, or missing required fields. The caller gets a single,
+    descriptive error in every failure mode.
+    """
+    try:
+        with open(path) as f:
+            payload = json.load(f)
+    except FileNotFoundError as exc:
+        raise ValueError(f"Study file not found: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Could not parse {path}: {exc}") from exc
 
-    runs = [ParametricRun(**r) for r in payload.get("runs", [])]
+    version = payload.get("schema_version")
+    if version != SCHEMA_VERSION:
+        raise ValueError(
+            f"{path}: schema_version {version!r} not supported "
+            f"(expected {SCHEMA_VERSION})"
+        )
+
+    try:
+        definition = ParametricStudyDef(**payload["definition"])
+        runs = [ParametricRun(**r) for r in payload.get("runs", [])]
+    except (KeyError, TypeError) as exc:
+        raise ValueError(f"{path}: malformed study payload: {exc}") from exc
 
     return LiveParametricStudy(
         definition=definition,
