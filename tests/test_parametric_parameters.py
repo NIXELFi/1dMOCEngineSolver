@@ -2,7 +2,6 @@
 
 import pytest
 
-from engine_simulator.config.engine_config import load_config
 from engine_simulator.gui.parametric.parameters import (
     Param,
     SWEEPABLE_PARAMETERS,
