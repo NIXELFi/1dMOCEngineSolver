@@ -1,5 +1,10 @@
 import type { SweepSummary } from "../types/events";
 import type { EngineConfigPayload } from "../state/configStore";
+import type {
+  Param,
+  LiveParametricStudy,
+  ParametricStudySummary,
+} from "../types/parametric";
 export type { EngineConfigPayload };
 
 const BASE = ""; // same origin (FastAPI serves both static + api)
@@ -28,6 +33,20 @@ export interface StartSweepParams {
   n_cycles: number;
   n_workers: number;
   config_name: string;
+}
+
+export interface StartParametricStudyParams {
+  name: string;
+  config_name: string;
+  parameter_path: string;
+  value_start: number;
+  value_end: number;
+  value_step: number;
+  sweep_rpm_start: number;
+  sweep_rpm_end: number;
+  sweep_rpm_step: number;
+  sweep_n_cycles: number;
+  n_workers: number;
 }
 
 async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
@@ -161,4 +180,40 @@ export const api = {
     a.click();
     URL.revokeObjectURL(url);
   },
+
+  // ---- Parametric studies ----
+
+  listParametricParameters: () =>
+    jsonFetch<Param[]>("/api/parametric/parameters"),
+
+  listParametricStudies: () =>
+    jsonFetch<ParametricStudySummary[]>("/api/parametric/studies"),
+
+  loadParametricStudy: (id: string) =>
+    jsonFetch<LiveParametricStudy>(
+      `/api/parametric/studies/${encodeURIComponent(id)}`,
+    ),
+
+  deleteParametricStudy: (id: string) =>
+    jsonFetch<{ deleted: string }>(
+      `/api/parametric/studies/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    ),
+
+  getCurrentParametricStudy: () =>
+    jsonFetch<LiveParametricStudy | null>("/api/parametric/study/current"),
+
+  startParametricStudy: (params: StartParametricStudyParams) =>
+    jsonFetch<{ study_id: string; status: string }>(
+      "/api/parametric/study/start",
+      {
+        method: "POST",
+        body: JSON.stringify(params),
+      },
+    ),
+
+  stopParametricStudy: () =>
+    jsonFetch<{ status: string }>("/api/parametric/study/stop", {
+      method: "POST",
+    }),
 };
