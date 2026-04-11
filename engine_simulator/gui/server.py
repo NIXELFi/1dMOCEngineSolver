@@ -34,16 +34,22 @@ parametric_manager = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """ASGI lifespan: starts the SweepManager on startup, cleans up on shutdown."""
+    """ASGI lifespan: initializes the sweep and parametric study managers
+    on startup, cleans up active studies on shutdown."""
     global sweep_manager, parametric_manager
     import asyncio
 
     loop = asyncio.get_running_loop()
     sweeps_dir = str(Path(__file__).resolve().parents[2] / "sweeps")
 
+    broadcast = None
+    try:
+        from engine_simulator.gui.routes_ws import broadcast
+    except ImportError:
+        logger.warning("routes_ws not available; broadcast disabled")
+
     try:
         from engine_simulator.gui.sweep_manager import SweepManager
-        from engine_simulator.gui.routes_ws import broadcast
         sweep_manager = SweepManager(
             loop=loop,
             sweeps_dir=sweeps_dir,

@@ -20,6 +20,8 @@ def client(tmp_path, monkeypatch):
     fake.get_current = MagicMock(return_value=None)
     fake.list_studies = MagicMock(return_value=[])
     fake.load_study = MagicMock()
+    fake.get_study_readonly = MagicMock()
+    fake.delete_study = MagicMock()
     fake._studies_dir = str(tmp_path)
 
     server_module.parametric_manager = fake
@@ -95,6 +97,20 @@ def test_list_studies_empty(client):
 
 def test_get_study_not_found(client):
     tc, fake = client
-    fake.load_study.side_effect = FileNotFoundError("nope")
+    fake.get_study_readonly.side_effect = FileNotFoundError("nope")
     resp = tc.get("/api/parametric/studies/missing")
     assert resp.status_code == 404
+
+
+def test_delete_study_not_found(client):
+    tc, fake = client
+    fake.delete_study.side_effect = FileNotFoundError("nope")
+    resp = tc.delete("/api/parametric/studies/missing")
+    assert resp.status_code == 404
+
+
+def test_delete_running_study_is_rejected(client):
+    tc, fake = client
+    fake.delete_study.side_effect = RuntimeError("cannot delete running study")
+    resp = tc.delete("/api/parametric/studies/param_running")
+    assert resp.status_code == 409

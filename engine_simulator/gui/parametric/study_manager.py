@@ -145,11 +145,51 @@ class ParametricStudyManager:
         return list_studies(self._studies_dir)
 
     def load_study(self, study_id: str) -> LiveParametricStudy:
-        from engine_simulator.gui.parametric.persistence import load_study as _load_study
+        """Load a saved study by ID. Sets _current as a side effect.
+
+        Raises FileNotFoundError if the study doesn't exist (distinct from
+        ValueError for corrupt/malformed study files).
+        """
         path = Path(self._studies_dir) / f"{study_id}.json"
-        state = _load_study(str(path))
+        if not path.exists():
+            raise FileNotFoundError(f"Study {study_id!r} not found")
+        # Lazy import to avoid circular import between study_manager
+        # and persistence (persistence imports study_manager's dataclasses).
+        from engine_simulator.gui.parametric.persistence import load_study as _load
+        state = _load(str(path))
         self._current = state
         return state
+
+    def get_study_readonly(self, study_id: str) -> LiveParametricStudy:
+        """Load a saved study WITHOUT mutating _current.
+
+        Used by HTTP GET handlers that need to return study data without
+        affecting the in-flight study pointer.
+        """
+        path = Path(self._studies_dir) / f"{study_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Study {study_id!r} not found")
+        from engine_simulator.gui.parametric.persistence import load_study as _load
+        return _load(str(path))
+
+    def delete_study(self, study_id: str) -> None:
+        """Delete a saved study file.
+
+        Refuses to delete the currently-running study to avoid the race
+        where the completion handler writes to a file that's been removed.
+        """
+        if (
+            self._current is not None
+            and self._current.definition.study_id == study_id
+            and self._current.status == "running"
+        ):
+            raise RuntimeError(
+                f"Cannot delete {study_id!r}: it is the currently running study"
+            )
+        path = Path(self._studies_dir) / f"{study_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Study {study_id!r} not found")
+        path.unlink()
 
     async def start_study(self, definition: ParametricStudyDef) -> str:
         if self._current is not None and self._current.status == "running":

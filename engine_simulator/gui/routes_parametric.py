@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import re
 from datetime import datetime, timezone
-from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
@@ -56,21 +54,25 @@ async def get_study(study_id: str):
     if server.parametric_manager is None:
         raise HTTPException(status_code=503, detail="manager not initialized")
     try:
-        server.parametric_manager.load_study(study_id)
-    except (FileNotFoundError, ValueError) as exc:
-        # load_study raises ValueError for "not found" with a clear message
-        if isinstance(exc, FileNotFoundError) or "not found" in str(exc).lower():
-            raise HTTPException(status_code=404, detail=f"study not found: {study_id}")
+        state = server.parametric_manager.get_study_readonly(study_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"study not found: {study_id}")
+    except ValueError as exc:
+        # persistence.load_study raises ValueError for malformed content or
+        # schema-version mismatch
         raise HTTPException(status_code=400, detail=str(exc))
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
 
-    studies_dir = Path(server.parametric_manager._studies_dir)
-    file_path = studies_dir / f"{study_id}.json"
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="study file missing")
-    with open(file_path) as f:
-        return json.load(f)
+    # Return a JSON-ready dict built from the loaded state — avoids a
+    # second disk read and keeps the route independent of the on-disk
+    # format.
+    return {
+        "definition": _definition_to_dict(state.definition),
+        "status": state.status,
+        "started_at": state.started_at,
+        "completed_at": state.completed_at,
+        "error": state.error,
+        "runs": [_run_to_dict(r) for r in state.runs],
+    }
 
 
 @router.delete("/studies/{study_id}")
@@ -80,11 +82,12 @@ async def delete_study(study_id: str):
     from engine_simulator.gui import server
     if server.parametric_manager is None:
         raise HTTPException(status_code=503, detail="manager not initialized")
-    studies_dir = Path(server.parametric_manager._studies_dir)
-    file_path = studies_dir / f"{study_id}.json"
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="study not found")
-    file_path.unlink()
+    try:
+        server.parametric_manager.delete_study(study_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"study not found: {study_id}")
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return {"deleted": study_id}
 
 

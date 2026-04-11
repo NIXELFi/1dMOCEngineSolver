@@ -268,3 +268,160 @@ async def test_stop_while_running_marks_study_stopped(tmp_path):
     assert current.runs[0].status == "done"
     assert current.runs[1].status == "queued"
     assert current.runs[2].status == "queued"
+
+
+@pytest.mark.asyncio
+async def test_load_study_raises_for_missing_file(tmp_path):
+    broadcast = MagicMock()
+    loop = asyncio.get_running_loop()
+
+    async def async_broadcast(msg):
+        broadcast(msg)
+
+    mgr = ParametricStudyManager(
+        loop=loop,
+        studies_dir=str(tmp_path),
+        broadcast_fn=async_broadcast,
+    )
+    import pytest as _pytest
+    with _pytest.raises(FileNotFoundError):
+        mgr.load_study("nope")
+
+
+@pytest.mark.asyncio
+async def test_get_study_readonly_does_not_touch_current(tmp_path):
+    """Loading a saved study for read-only display must NOT overwrite
+    the current in-flight study pointer."""
+    from engine_simulator.gui.parametric.study_manager import (
+        LiveParametricStudy, ParametricStudyDef, ParametricRun,
+    )
+    from engine_simulator.gui.parametric.persistence import save_study
+
+    broadcast = MagicMock()
+    loop = asyncio.get_running_loop()
+
+    async def async_broadcast(msg):
+        broadcast(msg)
+
+    mgr = ParametricStudyManager(
+        loop=loop,
+        studies_dir=str(tmp_path),
+        broadcast_fn=async_broadcast,
+    )
+
+    # Save a sentinel study to disk
+    saved = LiveParametricStudy(
+        definition=ParametricStudyDef(
+            study_id="saved_study",
+            name="saved",
+            config_name="cbr600rr.json",
+            parameter_path="plenum.volume",
+            parameter_values=[0.001],
+            sweep_rpm_start=6000.0,
+            sweep_rpm_end=7000.0,
+            sweep_rpm_step=1000.0,
+            sweep_n_cycles=1,
+            n_workers=1,
+            created_at="2026-04-10T12:00:00Z",
+        ),
+        status="complete",
+        started_at="2026-04-10T12:00:00Z",
+        completed_at="2026-04-10T12:05:00Z",
+        runs=[ParametricRun(parameter_value=0.001, status="done")],
+        error=None,
+    )
+    save_study(saved, str(tmp_path))
+
+    # Pretend there's a "different" current study
+    mgr._current = saved
+
+    # Read-only load should return the state but leave _current alone
+    result = mgr.get_study_readonly("saved_study")
+    assert result.definition.study_id == "saved_study"
+    # _current pointer unchanged (same object identity)
+    assert mgr.get_current() is saved
+
+
+@pytest.mark.asyncio
+async def test_delete_study_removes_file(tmp_path):
+    from engine_simulator.gui.parametric.study_manager import (
+        LiveParametricStudy, ParametricStudyDef,
+    )
+    from engine_simulator.gui.parametric.persistence import save_study
+
+    broadcast = MagicMock()
+    loop = asyncio.get_running_loop()
+
+    async def async_broadcast(msg):
+        broadcast(msg)
+
+    mgr = ParametricStudyManager(
+        loop=loop,
+        studies_dir=str(tmp_path),
+        broadcast_fn=async_broadcast,
+    )
+
+    saved = LiveParametricStudy(
+        definition=ParametricStudyDef(
+            study_id="to_delete",
+            name="del",
+            config_name="cbr600rr.json",
+            parameter_path="plenum.volume",
+            parameter_values=[0.001],
+            sweep_rpm_start=6000.0,
+            sweep_rpm_end=7000.0,
+            sweep_rpm_step=1000.0,
+            sweep_n_cycles=1,
+            n_workers=1,
+            created_at="2026-04-10T12:00:00Z",
+        ),
+        status="complete",
+        runs=[],
+    )
+    save_study(saved, str(tmp_path))
+    assert (tmp_path / "to_delete.json").exists()
+
+    mgr.delete_study("to_delete")
+    assert not (tmp_path / "to_delete.json").exists()
+
+
+@pytest.mark.asyncio
+async def test_delete_study_refuses_running_study(tmp_path):
+    from engine_simulator.gui.parametric.study_manager import (
+        LiveParametricStudy, ParametricStudyDef,
+    )
+
+    broadcast = MagicMock()
+    loop = asyncio.get_running_loop()
+
+    async def async_broadcast(msg):
+        broadcast(msg)
+
+    mgr = ParametricStudyManager(
+        loop=loop,
+        studies_dir=str(tmp_path),
+        broadcast_fn=async_broadcast,
+    )
+
+    # Simulate a running study
+    mgr._current = LiveParametricStudy(
+        definition=ParametricStudyDef(
+            study_id="active",
+            name="active",
+            config_name="cbr600rr.json",
+            parameter_path="plenum.volume",
+            parameter_values=[0.001],
+            sweep_rpm_start=6000.0,
+            sweep_rpm_end=7000.0,
+            sweep_rpm_step=1000.0,
+            sweep_n_cycles=1,
+            n_workers=1,
+            created_at="2026-04-10T12:00:00Z",
+        ),
+        status="running",
+        runs=[],
+    )
+
+    import pytest as _pytest
+    with _pytest.raises(RuntimeError, match="currently running"):
+        mgr.delete_study("active")
