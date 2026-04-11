@@ -9,8 +9,10 @@ from engine_simulator.gui.parametric.event_consumer import (
     ParametricEventConsumer,
 )
 from engine_simulator.simulation.parallel_sweep import (
+    ConvergedEvent,
     CycleDoneEvent,
     RPMDoneEvent,
+    RPMErrorEvent,
     RPMStartEvent,
 )
 
@@ -18,7 +20,7 @@ from engine_simulator.simulation.parallel_sweep import (
 @pytest.mark.asyncio
 async def test_rpm_start_is_rebroadcast_on_parametric_channel():
     broadcast = AsyncMock()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     consumer = ParametricEventConsumer(
         loop=loop,
         broadcast_fn=broadcast,
@@ -43,7 +45,7 @@ async def test_rpm_start_is_rebroadcast_on_parametric_channel():
 @pytest.mark.asyncio
 async def test_rpm_done_tagged_with_parameter_value():
     broadcast = AsyncMock()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     consumer = ParametricEventConsumer(
         loop=loop,
         broadcast_fn=broadcast,
@@ -67,7 +69,7 @@ async def test_rpm_done_tagged_with_parameter_value():
 @pytest.mark.asyncio
 async def test_nonfinite_delta_coerced_to_none():
     broadcast = AsyncMock()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     consumer = ParametricEventConsumer(
         loop=loop,
         broadcast_fn=broadcast,
@@ -83,3 +85,54 @@ async def test_nonfinite_delta_coerced_to_none():
 
     msg = broadcast.call_args[0][0]
     assert msg["delta"] is None
+
+
+@pytest.mark.asyncio
+async def test_converged_event_rebroadcast():
+    broadcast = AsyncMock()
+    loop = asyncio.get_running_loop()
+    consumer = ParametricEventConsumer(
+        loop=loop,
+        broadcast_fn=broadcast,
+        study_id="param_test",
+        parameter_value=0.15,
+    )
+    consumer.handle(ConvergedEvent(rpm=7500.0, cycle=6, ts=4.0))
+    await asyncio.sleep(0.05)
+
+    broadcast.assert_called_once()
+    msg = broadcast.call_args[0][0]
+    assert msg["type"] == "parametric_rpm_converged"
+    assert msg["rpm"] == 7500.0
+    assert msg["cycle"] == 6
+    assert msg["study_id"] == "param_test"
+    assert msg["parameter_value"] == 0.15
+
+
+@pytest.mark.asyncio
+async def test_rpm_error_event_rebroadcast():
+    broadcast = AsyncMock()
+    loop = asyncio.get_running_loop()
+    consumer = ParametricEventConsumer(
+        loop=loop,
+        broadcast_fn=broadcast,
+        study_id="param_test",
+        parameter_value=0.35,
+    )
+    consumer.handle(RPMErrorEvent(
+        rpm=12000.0,
+        error_type="RuntimeError",
+        error_msg="divergent",
+        traceback="Traceback (most recent call last):\n  ...",
+        ts=5.0,
+    ))
+    await asyncio.sleep(0.05)
+
+    broadcast.assert_called_once()
+    msg = broadcast.call_args[0][0]
+    assert msg["type"] == "parametric_rpm_error"
+    assert msg["rpm"] == 12000.0
+    assert msg["error_type"] == "RuntimeError"
+    assert msg["error_msg"] == "divergent"
+    assert msg["traceback"].startswith("Traceback")
+    assert msg["parameter_value"] == 0.35

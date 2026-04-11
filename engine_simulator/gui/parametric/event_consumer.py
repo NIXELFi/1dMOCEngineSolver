@@ -12,6 +12,8 @@ import asyncio
 import math
 from typing import Callable
 
+import logging
+
 from engine_simulator.gui.persistence import _coerce_jsonable
 from engine_simulator.simulation.parallel_sweep import (
     ConvergedEvent,
@@ -22,6 +24,8 @@ from engine_simulator.simulation.parallel_sweep import (
     RPMErrorEvent,
     RPMStartEvent,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _safe_float(v):
@@ -111,6 +115,11 @@ class ParametricEventConsumer(EventConsumer):
                 "traceback": event.traceback,
                 "ts": event.ts,
             })
+        else:
+            logger.warning(
+                "ParametricEventConsumer: unknown event type %s; dropped",
+                type(event).__name__,
+            )
 
     def close(self) -> None:
         pass
