@@ -24,6 +24,8 @@ class BoundsError(ValueError):
     """Raised when a value is outside the allowed bounds for a parameter."""
 
 
+# Keys must match identifier syntax. Hyphenated or quoted-JSON keys
+# are not supported by design (all current config keys are identifiers).
 # Matches a path segment like "foo", "foo[0]", or "foo[*]".
 _SEGMENT_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)(?:\[(\d+|\*)\])?$")
 
@@ -50,7 +52,9 @@ def _descend(obj: Any, segments: list[tuple[str, Optional[str]]]) -> Any:
     name, index = segments[0]
     rest = segments[1:]
 
-    if not isinstance(obj, dict) or name not in obj:
+    if not isinstance(obj, dict):
+        raise PathError(f"expected dict at {name}, got {type(obj).__name__}")
+    if name not in obj:
         raise PathError(f"missing key: {name}")
 
     child = obj[name]
@@ -80,7 +84,9 @@ def _apply(obj: Any, segments: list[tuple[str, Optional[str]]], value: float) ->
     name, index = segments[0]
     rest = segments[1:]
 
-    if not isinstance(obj, dict) or name not in obj:
+    if not isinstance(obj, dict):
+        raise PathError(f"expected dict at {name}, got {type(obj).__name__}")
+    if name not in obj:
         raise PathError(f"missing key: {name}")
 
     if index is None:
@@ -95,9 +101,11 @@ def _apply(obj: Any, segments: list[tuple[str, Optional[str]]], value: float) ->
         raise PathError(f"expected list at {name}, got {type(child).__name__}")
 
     if index == "*":
+        if not rest:
+            raise PathError(f"wildcard requires a trailing field: {name}[*]")
+        if not child:
+            raise PathError(f"wildcard on empty list: {name}")
         for item in child:
-            if not rest:
-                raise PathError(f"wildcard requires a trailing field: {name}[*]")
             _apply(item, rest, value)
         return
 

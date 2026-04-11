@@ -116,3 +116,15 @@ def test_set_within_bounds_succeeds(config):
         min_allowed=0.0001, max_allowed=0.02,
     )
     assert result["plenum"]["volume"] == 0.002
+
+
+def test_set_wildcard_without_trailing_field_raises(config):
+    with pytest.raises(PathError, match="wildcard requires a trailing field"):
+        set_parameter(config, "intake_pipes[*]", 0.5)
+
+
+def test_descend_into_non_dict_raises(config):
+    # plenum.volume is a float; trying to descend further should raise
+    # an error that distinguishes "not a dict" from "missing key".
+    with pytest.raises(PathError, match="expected dict"):
+        get_parameter(config, "plenum.volume.nested")
