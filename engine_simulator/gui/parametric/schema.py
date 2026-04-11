@@ -6,14 +6,24 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from engine_simulator.gui.parametric.parameters import find_parameter
 
+MAX_PARAMETER_VALUES = 200
+
 
 def resolve_parameter_values(
     start: float, end: float, step: float
 ) -> list[float]:
-    """Generate parameter values from (start, end, step), inclusive of end.
+    """Generate parameter values from (start, end, step).
 
-    Uses integer arithmetic on a scaled step to avoid floating-point drift
-    at the endpoint.
+    When `step` divides `(end - start)` evenly, the returned list is
+    inclusive of `end`. When it does not, the last value is the largest
+    `start + i * step` that stays within a half-step tolerance of `end`
+    (i.e. nearest-integer rounding of the step count). A `value_step`
+    that does not cleanly divide the range will therefore produce a
+    sweep that stops short of `value_end`; the schema validation warns
+    about this via the divisibility check in ParametricStudyStartRequest.
+
+    Uses index multiplication (`start + i * step`) rather than repeated
+    addition to avoid floating-point drift at the endpoint.
     """
     if step <= 0:
         raise ValueError("step must be positive")
@@ -29,8 +39,8 @@ class ParametricStudyStartRequest(BaseModel):
     """Request body for POST /api/parametric/study/start."""
 
     name: str = Field(..., min_length=1, max_length=200)
-    config_name: str = Field(..., min_length=1)
-    parameter_path: str = Field(..., min_length=1)
+    config_name: str = Field(..., min_length=1, max_length=200)
+    parameter_path: str = Field(..., min_length=1, max_length=200)
 
     value_start: float
     value_end: float
@@ -55,6 +65,14 @@ class ParametricStudyStartRequest(BaseModel):
             raise ValueError("sweep_rpm_end must be > sweep_rpm_start")
         if self.value_end <= self.value_start:
             raise ValueError("value_end must be > value_start")
+        # Guard against DoS from huge requests: cap the number of points.
+        if self.value_step > 0:
+            n_approx = round((self.value_end - self.value_start) / self.value_step) + 1
+            if n_approx > MAX_PARAMETER_VALUES:
+                raise ValueError(
+                    f"value range would produce ~{n_approx} points; "
+                    f"maximum is {MAX_PARAMETER_VALUES}"
+                )
         param = find_parameter(self.parameter_path)
         if param is None:
             return self  # already caught by field_validator
@@ -68,6 +86,14 @@ class ParametricStudyStartRequest(BaseModel):
                 f"value_end={self.value_end} above max_allowed={param.max_allowed} "
                 f"for {self.parameter_path}"
             )
+        if self.sweep_rpm_step > 0:
+            n_rpms = round(
+                (self.sweep_rpm_end - self.sweep_rpm_start) / self.sweep_rpm_step
+            ) + 1
+            if n_rpms > 500:
+                raise ValueError(
+                    f"RPM range would produce ~{n_rpms} points; maximum is 500"
+                )
         return self
 
     def parameter_values(self) -> list[float]:

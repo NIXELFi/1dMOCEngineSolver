@@ -79,3 +79,41 @@ def test_resolve_parameter_values_handles_fp_roundoff():
     assert len(values) == 5
     assert values[0] == pytest.approx(0.15)
     assert values[-1] == pytest.approx(0.35)
+
+
+def test_rejects_value_end_above_max_allowed():
+    body = _valid_body()
+    body["parameter_path"] = "plenum.volume"
+    body["value_start"] = 0.001
+    body["value_end"] = 0.05  # above max_allowed=0.02
+    body["value_step"] = 0.001
+    with pytest.raises(ValidationError, match="max_allowed|bound"):
+        ParametricStudyStartRequest(**body)
+
+
+def test_rejects_too_many_parameter_values():
+    body = _valid_body()
+    # intake_pipes[*].length allows 0.02..1.0; request 500 points
+    body["parameter_path"] = "intake_pipes[*].length"
+    body["value_start"] = 0.02
+    body["value_end"] = 1.0
+    body["value_step"] = 0.002  # ~491 points, over cap
+    with pytest.raises(ValidationError, match="maximum is 200|would produce"):
+        ParametricStudyStartRequest(**body)
+
+
+def test_rejects_too_many_rpm_points():
+    body = _valid_body()
+    body["sweep_rpm_start"] = 1000
+    body["sweep_rpm_end"] = 20000
+    body["sweep_rpm_step"] = 10  # 1901 points, over cap
+    with pytest.raises(ValidationError, match="maximum is 500|RPM range"):
+        ParametricStudyStartRequest(**body)
+
+
+def test_parameter_values_method_returns_generated_list():
+    req = ParametricStudyStartRequest(**_valid_body())
+    values = req.parameter_values()
+    assert values[0] == pytest.approx(0.15)
+    assert values[-1] == pytest.approx(0.35)
+    assert len(values) == 5
