@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import ParametricSetupForm from "./ParametricSetupForm";
 import ParametricRunGrid from "./ParametricRunGrid";
 import ParametricResultsView from "./ParametricResultsView";
+import ParametricStudyListSidebar from "./ParametricStudyListSidebar";
 
 /**
  * Root component for the Parametric tab. Routes between three modes
@@ -58,5 +59,10 @@ export default function ParametricView() {
     content = <ParametricResultsView />;
   }
 
-  return <div className="flex-1 overflow-hidden">{content}</div>;
+  return (
+    <div className="flex flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden">{content}</div>
+      <ParametricStudyListSidebar />
+    </div>
+  );
 }
