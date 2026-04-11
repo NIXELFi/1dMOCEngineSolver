@@ -204,3 +204,67 @@ def _fake_config_from_dict(d):
     cfg.plenum = _Cfg()
     cfg.plenum.volume = d["plenum"]["volume"]
     return cfg
+
+
+@pytest.mark.asyncio
+async def test_stop_while_running_marks_study_stopped(tmp_path):
+    """A cooperative orchestrator polls the manager's stop flag and returns
+    fast enough that we can observe the stopped state.
+    """
+    import threading
+    started = threading.Event()
+    proceed = threading.Event()
+
+    class _SlowOrchestrator:
+        def __init__(self, config):
+            pass
+
+        def run_rpm_sweep(self, **kwargs):
+            started.set()
+            proceed.wait(timeout=5.0)  # wait for test to tell us to continue
+            return [{"rpm": 6000.0, "brake_power_hp": 50.0, "brake_torque_Nm": 50.0}]
+
+    broadcast = MagicMock()
+    loop = asyncio.get_running_loop()
+
+    async def async_broadcast(msg):
+        broadcast(msg)
+
+    mgr = ParametricStudyManager(
+        loop=loop,
+        studies_dir=str(tmp_path),
+        broadcast_fn=async_broadcast,
+    )
+
+    with patch(
+        "engine_simulator.gui.parametric.study_manager.SimulationOrchestrator",
+        _SlowOrchestrator,
+    ), patch(
+        "engine_simulator.gui.parametric.study_manager._load_config_dict",
+        return_value=_minimal_config_dict(),
+    ), patch(
+        "engine_simulator.gui.parametric.study_manager._config_from_dict",
+        side_effect=_fake_config_from_dict,
+    ):
+        # 3 values — first one will be in-flight when we stop
+        await mgr.start_study(_def([0.001, 0.002, 0.003]))
+
+        # Wait until the first run enters run_rpm_sweep
+        while not started.is_set():
+            await asyncio.sleep(0.01)
+
+        # Request stop: await it directly so the stop flag is set before we
+        # release the blocked sweep.  We run stop_study in a background task
+        # so we can interleave proceed.set() — but we yield first so the task
+        # starts and sets the flag before the worker thread is unblocked.
+        stop_task = asyncio.create_task(mgr.stop_study())
+        await asyncio.sleep(0)  # yield so stop_study runs and sets the flag
+        proceed.set()  # now let the first sweep return
+        await stop_task
+
+    current = mgr.get_current()
+    assert current.status == "stopped"
+    # First run completed, second and third never started
+    assert current.runs[0].status == "done"
+    assert current.runs[1].status == "queued"
+    assert current.runs[2].status == "queued"

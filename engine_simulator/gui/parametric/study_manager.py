@@ -6,8 +6,26 @@ added in a later task.
 
 from __future__ import annotations
 
+import asyncio
+import json
+import logging
+import threading
+import traceback as _traceback
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Callable, Literal, Optional
+
+from engine_simulator.gui.parametric.event_consumer import (
+    ParametricEventConsumer,
+)
+from engine_simulator.gui.parametric.parameters import find_parameter
+from engine_simulator.gui.parametric.path_resolver import set_parameter
+from engine_simulator.simulation.orchestrator import SimulationOrchestrator
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -52,31 +70,6 @@ class LiveParametricStudy:
     completed_at: Optional[str] = None
     runs: list[ParametricRun] = field(default_factory=list)
     error: Optional[str] = None
-
-
-# ============================================================================
-# Manager
-# ============================================================================
-
-import asyncio
-import json
-import logging
-import threading
-import traceback as _traceback
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Callable
-
-from engine_simulator.gui.parametric.event_consumer import (
-    ParametricEventConsumer,
-)
-from engine_simulator.gui.parametric.parameters import find_parameter
-from engine_simulator.gui.parametric.path_resolver import set_parameter
-from engine_simulator.simulation.orchestrator import SimulationOrchestrator
-
-
-logger = logging.getLogger(__name__)
 
 
 def _iso_now() -> str:
@@ -136,6 +129,15 @@ class ParametricStudyManager:
         self._study_task: Optional[asyncio.Task] = None
 
     def get_current(self) -> Optional[LiveParametricStudy]:
+        """Return the current study state (live reference, not a copy).
+
+        Note: the returned object is mutated from the background executor
+        thread while a study is running. Callers that iterate `runs` or
+        `sweep_results` while a sweep is in progress may observe partially
+        populated data. For serialization, prefer to call this at a point
+        where you know a broadcast has just landed (value_done events are
+        safe read points).
+        """
         return self._current
 
     def list_studies(self) -> list[dict]:
@@ -174,6 +176,15 @@ class ParametricStudyManager:
         return definition.study_id
 
     async def stop_study(self) -> None:
+        """Request the running study to stop at the next value boundary.
+
+        Sets the stop flag and awaits the study task. The flag is only
+        checked BETWEEN parameter values, so the currently-executing RPM
+        sweep runs to completion before the study exits. This method
+        therefore blocks the caller (and the asyncio loop if awaited in
+        foreground) until the in-flight sweep finishes. Callers that
+        want fire-and-forget semantics should not await the return value.
+        """
         if self._current is None or self._current.status != "running":
             return
         self._stop_flag.set()
@@ -297,11 +308,24 @@ class ParametricStudyManager:
             })
 
     def _schedule_broadcast(self, msg: dict) -> None:
-        """Thread-safe: schedule a broadcast on the event loop."""
+        """Thread-safe: schedule a broadcast on the event loop.
+
+        Logs any exception raised inside the broadcast coroutine instead of
+        silently discarding it. A closed loop still swallows RuntimeError.
+        """
         try:
-            asyncio.run_coroutine_threadsafe(self._broadcast(msg), self._loop)
+            fut = asyncio.run_coroutine_threadsafe(self._broadcast(msg), self._loop)
         except RuntimeError:
-            pass
+            return
+
+        def _log_error(f):
+            if f.cancelled():
+                return
+            exc = f.exception()
+            if exc is not None:
+                logger.warning("parametric broadcast failed: %s", exc)
+
+        fut.add_done_callback(_log_error)
 
     async def _broadcast_safe(self, msg: dict) -> None:
         """Async broadcast with error swallowing."""
