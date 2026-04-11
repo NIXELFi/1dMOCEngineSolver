@@ -1,7 +1,5 @@
 """Whitelist integrity tests for sweepable parameters."""
 
-import pytest
-
 from engine_simulator.gui.parametric.parameters import (
     Param,
     SWEEPABLE_PARAMETERS,
@@ -39,7 +37,6 @@ def test_find_parameter_returns_none_for_unknown():
     assert find_parameter("cylinder.bore") is None
 
 
-@pytest.mark.xfail(reason="path_resolver implemented in Task 2")
 def test_all_whitelisted_paths_resolve_against_default_config():
     """Every whitelisted path must be a valid path into the default config."""
     from engine_simulator.gui.parametric.path_resolver import get_parameter
