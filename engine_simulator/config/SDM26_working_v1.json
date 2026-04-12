@@ -225,5 +225,5 @@
     },
     "p_ambient": 101325.0,
     "T_ambient": 300.0,
-    "drivetrain_efficiency": 1.0
+    "drivetrain_efficiency": 0.91
 }
