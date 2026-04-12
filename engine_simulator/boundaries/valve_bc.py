@@ -116,12 +116,6 @@ class ValveBoundaryCondition(BoundaryCondition):
             else:
                 self.cylinder.mdot_intake += mdot_valve
 
-        # Note: pipe.AA[idx] is NOT overwritten here. The Newton-Raphson
-        # solver used pipe.AA[idx] for the A_b <-> p_b mapping, so the
-        # returned Riemann variables are self-consistent with the current
-        # entropy level.  Exhaust entropy propagation into the pipe interior
-        # is handled by the MOC contact-surface advection, not the BC.
-
     def _boundary_residual(
         self,
         A_b: float,
