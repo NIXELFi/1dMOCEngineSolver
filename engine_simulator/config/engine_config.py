@@ -39,6 +39,7 @@ class PipeConfig:
     n_points: int = 30
     wall_temperature: float = 320.0  # K
     roughness: float = 0.03e-3  # m (surface roughness for friction)
+    artificial_viscosity: float = -1.0  # -1 = use global SimulationConfig default
 
 
 @dataclass

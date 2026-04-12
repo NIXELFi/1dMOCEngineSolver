@@ -367,11 +367,13 @@ class SimulationOrchestrator:
             self.exhaust_open_bc.apply(self.exhaust_collector, PipeEnd.RIGHT, dt)
 
             # 4. Advance interior points for all pipes
+            global_av = cfg.simulation.artificial_viscosity
             for pipe in self.all_pipes:
+                av = pipe.artificial_viscosity if pipe.artificial_viscosity >= 0 else global_av
                 advance_interior_points(
                     pipe, dt,
                     include_sources=include_sources,
-                    artificial_viscosity=cfg.simulation.artificial_viscosity,
+                    artificial_viscosity=av,
                 )
 
             # 6. Update cylinder thermodynamics

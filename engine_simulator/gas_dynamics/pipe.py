@@ -35,6 +35,7 @@ class Pipe:
         wall_temperature: float = 320.0,
         roughness: float = 0.03e-3,
         gamma: float = GAMMA_REF,
+        artificial_viscosity: float = -1.0,
     ):
         self.name = name
         self.length = length
@@ -42,6 +43,7 @@ class Pipe:
         self.wall_temperature = wall_temperature
         self.roughness = roughness
         self.gamma = gamma
+        self.artificial_viscosity = artificial_viscosity
 
         # Grid
         self.dx = length / (n_points - 1) if n_points > 1 else length
@@ -148,4 +150,5 @@ class Pipe:
             diameter_out=cfg.diameter_out,
             wall_temperature=cfg.wall_temperature,
             roughness=cfg.roughness,
+            artificial_viscosity=getattr(cfg, 'artificial_viscosity', -1.0),
         )

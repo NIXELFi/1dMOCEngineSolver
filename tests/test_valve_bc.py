@@ -178,3 +178,15 @@ class TestSubsonicExhaust:
             f"Subsonic exhaust must also create compression: "
             f"lam={pipe.lam[0]:.4f}, bet={pipe.bet[0]:.4f}"
         )
+
+
+class TestPerPipeArtificialViscosity:
+    def test_pipe_stores_av_from_config(self):
+        from engine_simulator.config.engine_config import PipeConfig
+        cfg = PipeConfig(name="test", length=0.3, diameter=0.03, artificial_viscosity=0.0)
+        pipe = Pipe.from_config(cfg)
+        assert pipe.artificial_viscosity == 0.0
+
+    def test_pipe_default_av_is_negative(self):
+        pipe = Pipe("test", length=0.3, diameter=0.03)
+        assert pipe.artificial_viscosity == -1.0

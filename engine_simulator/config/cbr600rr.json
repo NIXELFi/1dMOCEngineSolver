@@ -128,7 +128,8 @@
             "diameter_out": null,
             "n_points": 30,
             "wall_temperature": 650.0,
-            "roughness": 0.000046
+            "roughness": 0.000046,
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_2",
@@ -137,7 +138,8 @@
             "diameter_out": null,
             "n_points": 30,
             "wall_temperature": 650.0,
-            "roughness": 0.000046
+            "roughness": 0.000046,
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_3",
@@ -146,7 +148,8 @@
             "diameter_out": null,
             "n_points": 30,
             "wall_temperature": 650.0,
-            "roughness": 0.000046
+            "roughness": 0.000046,
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_4",
@@ -155,7 +158,8 @@
             "diameter_out": null,
             "n_points": 30,
             "wall_temperature": 650.0,
-            "roughness": 0.000046
+            "roughness": 0.000046,
+            "artificial_viscosity": 0.0
         }
     ],
     "exhaust_secondaries": [
