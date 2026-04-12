@@ -126,9 +126,9 @@ class EngineConfig:
     intake_valve: ValveConfig = field(
         default_factory=lambda: ValveConfig(
             diameter=0.0275,
-            max_lift=0.0081,
-            open_angle=338.0,
-            close_angle=583.0,
+            max_lift=0.00856,
+            open_angle=350.0,
+            close_angle=585.0,
             cd_table=[
                 (0.05, 0.190),  # 0.20 × 0.95
                 (0.10, 0.380),  # 0.40 × 0.95
@@ -143,7 +143,7 @@ class EngineConfig:
     exhaust_valve: ValveConfig = field(
         default_factory=lambda: ValveConfig(
             diameter=0.023,
-            max_lift=0.00692,
+            max_lift=0.00735,
             open_angle=140.0,
             close_angle=365.0,
             cd_table=[
