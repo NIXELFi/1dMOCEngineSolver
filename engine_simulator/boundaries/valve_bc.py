@@ -4,6 +4,15 @@ Uses impedance-coupled compressible orifice model: Newton-Raphson on the
 boundary non-dimensional sound speed A_b ensures mass conservation between
 the valve orifice flow and the pipe's characteristic-compatible flow, with
 self-consistent density derived from A_b at each iteration.
+
+Note on exhaust entropy: the NR solves using the pipe's current entropy
+level (AA), not the exhaust gas entropy. This gives correct pressure and
+velocity (and therefore correct wave amplitudes and diameter sensitivity)
+but underestimates exhaust gas temperatures and wave speeds by ~2x. A
+proper fix requires either a conservative (finite volume) formulation or
+contact-surface tracking — the MOC characteristic framework can't
+represent an entropy discontinuity at a subsonic boundary without
+destabilizing the incoming C- wave.
 """
 
 from __future__ import annotations
@@ -22,19 +31,11 @@ from engine_simulator.gas_dynamics.pipe import Pipe
 
 
 class ValveBoundaryCondition(BoundaryCondition):
-    """Connects a pipe end to a cylinder through a valve.
-
-    The valve is modeled as a quasi-steady compressible orifice.
-    Flow direction is determined by comparing cylinder and pipe pressures.
-    The boundary state is found by a Newton-Raphson iteration that matches
-    the valve mass flow to the pipe mass flow (rho * u * A) derived from
-    the Benson Riemann variables, ensuring self-consistent density and
-    proper acoustic impedance coupling.
-    """
+    """Connects a pipe end to a cylinder through a valve."""
 
     def __init__(self, cylinder, valve_type: str = "intake"):
         self.cylinder = cylinder
-        self.valve_type = valve_type  # "intake" or "exhaust"
+        self.valve_type = valve_type
 
     def apply(self, pipe: Pipe, end: PipeEnd, dt: float, **kwargs):
         theta_deg = kwargs.get("theta_deg", 0.0)
@@ -68,7 +69,6 @@ class ValveBoundaryCondition(BoundaryCondition):
         T_cyl = self.cylinder.T
 
         A_b = pipe.A_nd[idx]
-
         mdot_valve = 0.0
         flow_sign = 1.0
         p_b = pipe.p[idx]
@@ -108,7 +108,6 @@ class ValveBoundaryCondition(BoundaryCondition):
                 break
 
             dA = -F / dF
-
             if prev_dA * dA < 0:
                 dA *= 0.5
             prev_dA = dA
@@ -141,12 +140,6 @@ class ValveBoundaryCondition(BoundaryCondition):
             else:
                 self.cylinder.mdot_intake += mdot_valve
 
-        if self.valve_type == "exhaust" and flow_sign > 0 and mdot_valve > 1e-8:
-            T_ratio = T_cyl / T_REF
-            p_ratio = p_cyl / P_REF
-            AA_exhaust = np.sqrt(T_ratio) * p_ratio ** (-(gam - 1.0) / (2.0 * gam))
-            pipe.AA[idx] = max(AA_exhaust, 0.01)
-
     def _boundary_residual(
         self,
         A_b: float,
@@ -159,17 +152,7 @@ class ValveBoundaryCondition(BoundaryCondition):
         A_eff: float,
         gam: float,
     ) -> tuple[float, float, float, float, float]:
-        """Mass conservation residual at the pipe-valve boundary.
-
-        Solves: mdot_pipe(A_b) - mdot_valve(A_b) = 0
-
-        where mdot_pipe = rho(A_b) * u(A_b) * A_pipe is the pipe mass flow
-        derived self-consistently from the boundary sound speed and the
-        incoming Riemann variable, and mdot_valve is the quasi-steady
-        orifice mass flow at the corresponding boundary pressure.
-
-        Returns (residual, mdot_valve, flow_sign, p_b, T_b).
-        """
+        """Mass conservation residual at the pipe-valve boundary."""
         gm1 = gam - 1.0
 
         if end == PipeEnd.LEFT:

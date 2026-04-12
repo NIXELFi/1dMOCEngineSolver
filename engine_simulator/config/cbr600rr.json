@@ -129,7 +129,7 @@
             "n_points": 30,
             "wall_temperature": 650.0,
             "roughness": 0.000046,
-            "artificial_viscosity": 0.01
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_2",
@@ -139,7 +139,7 @@
             "n_points": 30,
             "wall_temperature": 650.0,
             "roughness": 0.000046,
-            "artificial_viscosity": 0.01
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_3",
@@ -149,7 +149,7 @@
             "n_points": 30,
             "wall_temperature": 650.0,
             "roughness": 0.000046,
-            "artificial_viscosity": 0.01
+            "artificial_viscosity": 0.0
         },
         {
             "name": "exhaust_primary_4",
@@ -159,7 +159,7 @@
             "n_points": 30,
             "wall_temperature": 650.0,
             "roughness": 0.000046,
-            "artificial_viscosity": 0.01
+            "artificial_viscosity": 0.0
         }
     ],
     "exhaust_secondaries": [
@@ -221,7 +221,7 @@
         "cfl_number": 0.85,
         "convergence_tolerance": 0.005,
         "crank_step_max": 1.0,
-        "artificial_viscosity": 0.015
+        "artificial_viscosity": 0.05
     },
     "p_ambient": 101325.0,
     "T_ambient": 300.0,

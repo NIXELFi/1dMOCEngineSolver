@@ -99,7 +99,6 @@ class TestExhaustBlowdown:
         bc = ValveBoundaryCondition(cyl, valve_type="exhaust")
         pipe = _make_exhaust_pipe(diameter=0.032)
 
-        AA_before = pipe.AA[0]
         bc.apply(pipe, PipeEnd.LEFT, dt=1e-5, theta_deg=0.0, rpm=10000.0)
 
         gam = 1.4
@@ -107,7 +106,8 @@ class TestExhaustBlowdown:
         A_b = (pipe.lam[0] + pipe.bet[0]) / 2.0
         U_b = (pipe.lam[0] - pipe.bet[0]) / gm1
         u_b = U_b * A_REF
-        p_b = P_REF * (A_b / max(AA_before, 1e-6)) ** (2.0 * gam / gm1)
+        AA = pipe.AA[0]
+        p_b = P_REF * (A_b / max(AA, 1e-6)) ** (2.0 * gam / gm1)
         T_b = T_REF * A_b ** 2
         rho_b = p_b / (R_AIR * T_b)
         A_pipe = pipe.area[0]
