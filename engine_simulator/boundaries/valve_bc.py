@@ -74,10 +74,26 @@ class ValveBoundaryCondition(BoundaryCondition):
         p_b = pipe.p[idx]
         T_b = pipe.T[idx]
 
-        for _ in range(20):
+        best_A = A_b
+        best_F = float("inf")
+        best_mdot = 0.0
+        best_sign = 1.0
+        best_pb = p_b
+        best_Tb = T_b
+        prev_dA = 0.0
+
+        for _ in range(25):
             F, mdot_valve, flow_sign, p_b, T_b = self._boundary_residual(
                 A_b, R_in, AA, end, A_pipe_area, p_cyl, T_cyl, A_eff, gam,
             )
+
+            if abs(F) < best_F:
+                best_F = abs(F)
+                best_A = A_b
+                best_mdot = mdot_valve
+                best_sign = flow_sign
+                best_pb = p_b
+                best_Tb = T_b
 
             if abs(F) < 1e-8:
                 break
@@ -92,17 +108,26 @@ class ValveBoundaryCondition(BoundaryCondition):
                 break
 
             dA = -F / dF
+
+            if prev_dA * dA < 0:
+                dA *= 0.5
+            prev_dA = dA
+
             dA = max(-0.3 * A_b, min(0.3 * A_b, dA))
             A_b += dA
             A_b = max(A_b, 0.01)
+        else:
+            A_b = best_A
+            mdot_valve = best_mdot
+            flow_sign = best_sign
+            p_b = best_pb
+            T_b = best_Tb
 
         if end == PipeEnd.RIGHT:
             pipe.bet[idx] = 2.0 * A_b - R_in
         else:
             pipe.lam[idx] = 2.0 * A_b - R_in
 
-        # Use += so two valve BCs can add their contributions during overlap.
-        # The orchestrator zeros mdot_intake / mdot_exhaust before each step.
         if self.valve_type == "intake":
             if flow_sign > 0:
                 self.cylinder.mdot_intake += mdot_valve
@@ -115,6 +140,12 @@ class ValveBoundaryCondition(BoundaryCondition):
                 self.cylinder.T_exhaust = T_cyl
             else:
                 self.cylinder.mdot_intake += mdot_valve
+
+        if self.valve_type == "exhaust" and flow_sign > 0 and mdot_valve > 1e-8:
+            T_ratio = T_cyl / T_REF
+            p_ratio = p_cyl / P_REF
+            AA_exhaust = np.sqrt(T_ratio) * p_ratio ** (-(gam - 1.0) / (2.0 * gam))
+            pipe.AA[idx] = max(AA_exhaust, 0.01)
 
     def _boundary_residual(
         self,
