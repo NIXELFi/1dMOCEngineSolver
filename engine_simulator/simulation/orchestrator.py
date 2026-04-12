@@ -182,6 +182,14 @@ class SimulationOrchestrator:
                 signs=[1, 1, -1],
             )
             self.exhaust_junctions = [j1, j2, j3]
+        elif len(self.exhaust_secondaries) == 0:
+            # 4-1 configuration: all primaries merge directly into collector
+            j1 = JunctionBC(
+                pipes=[*self.exhaust_primaries, self.exhaust_collector],
+                ends=[PipeEnd.RIGHT] * len(self.exhaust_primaries) + [PipeEnd.LEFT],
+                signs=[1] * len(self.exhaust_primaries) + [-1],
+            )
+            self.exhaust_junctions = [j1]
 
         # Exhaust collector RIGHT end: open to atmosphere
         self.exhaust_open_bc = OpenEndBC(p_atm=cfg.p_ambient, T_atm=cfg.T_ambient)
