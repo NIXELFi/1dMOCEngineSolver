@@ -1,5 +1,42 @@
 # 1D MOC Engine Solver
 
+> ### ⚠️ Known exhaust-side limitation — superseded by V2 for exhaust tuning
+>
+> This MOC-based solver has a structural limitation in its valve boundary
+> condition: it carries the pipe's entropy level (AA) across the valve
+> instead of the cylinder's exhaust-gas entropy, which causes exhaust
+> gas temperatures at the primary valve face to be reported near
+> **atmospheric (~275 K)** instead of their physical value (~1000–1400 K
+> at WOT). Exhaust wave speeds are consequently underpredicted by ~2×.
+>
+> **Quantitative comparison across 6000–13500 RPM** (see
+> `../1d_v2/docs/v2_vs_v1_comparison.md` in the parallel V2 repository
+> for full data):
+>
+> | | This (V1 MOC) | V2 (FV + HLLC) |
+> |---|---|---|
+> | EGT at valve face, sweep range | 250–303 K (flat) | 1049–1351 K (rising with RPM) |
+> | EGT delta (V2 − V1) | — | +778 K to +1064 K |
+> | Mass conservation residual | O(1e-5) to O(1e-3) kg/cycle | O(1e-18) kg/cycle |
+> | Numerical convergence | 13/16 sweep points | 16/16 |
+>
+> **Affected:** any exhaust geometry decision, primary/secondary length
+> tuning, collector sizing, or anything that depends on exhaust wave
+> timing. Tuned-length predictions from this code should be treated as
+> known-wrong.
+>
+> **Not affected:** intake-side predictions. The intake BCs (restrictor,
+> plenum, runners) are not known to be broken and continue to be usable
+> while you are investigating intake geometry or ECU calibration.
+>
+> Production exhaust work should use the V2 solver at
+> [`1dFVEngineSolver`](https://github.com/NIXELFi/1dFVEngineSolver).
+> The V1 codebase here remains active for intake research and for
+> impedance-coupled-valve-BC experimentation on the
+> `feat/impedance-coupled-valve-bc` branch, which may eventually inform
+> V2's valve BC treatment but does not fix the underlying entropy-
+> transport issue on its own.
+
 A high-performance 1D Method of Characteristics (MOC) engine simulation solver for the Honda CBR600RR motorcycle engine. Accurately models engine thermodynamics, combustion, intake/exhaust wave dynamics, and produces real-time performance predictions across operating ranges.
 
 ## Features
